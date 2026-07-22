@@ -6,7 +6,7 @@ from app.services.user_service import UserService
 jwt = JWTManager()
 cors = CORS()
 
-socketio = SocketIO(cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(cors_allowed_origins="*")
 
 
 @jwt.token_in_blocklist_loader

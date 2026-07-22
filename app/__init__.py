@@ -10,7 +10,7 @@ def create_app(config_class=Config):
 
     jwt.init_app(app)
     cors.init_app(app)
-    socketio.init_app(app, async_mode=app.config["SOCKETIO_ASYNC_MODE"])
+    socketio.init_app(app)
 
     from app.auth import auth_bp
     from app.chat import chat_bp

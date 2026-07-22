@@ -26,7 +26,4 @@ class Config:
     JWT_HEADER_TYPE = "Bearer"
     JWT_BLOCKLIST_ENABLED = True
 
-    # --- SocketIO ---
-    # "threading" mode was specifically requested: it runs on plain Flask's
-    # dev server / any WSGI server without needing eventlet or gevent.
-    SOCKETIO_ASYNC_MODE = "threading"
+
