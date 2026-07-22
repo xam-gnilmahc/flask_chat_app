@@ -33,6 +33,8 @@ class AuthService:
         user = UserService.get_by_username(username)
         if user is None or not check_password_hash(user["password_hash"], password):
             raise AuthError("Invalid username or password", 401)
+        if user.get("status", 1) != 1:
+            raise AuthError("Account is inactive. Contact support.", 403)
         return user
 
     @staticmethod
