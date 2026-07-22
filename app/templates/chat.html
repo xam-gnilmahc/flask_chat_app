@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connex</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">💬</div>
+          <span>Connex</span>
+        </div>
+        <div class="sidebar-actions">
+          <button id="logoutBtn" class="icon-btn" title="Logout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="online-summary">
+        <span class="dot online"></span>
+        <span id="onlineCount">0</span> online
+      </div>
+
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search users..." autocomplete="off">
+      </div>
+
+      <div class="sidebar-section-label">Messages</div>
+      <ul id="userList" class="user-list"></ul>
+
+      <div class="sidebar-footer" id="profileBtn">
+        <div class="current-user">
+          <div class="avatar avatar-sm" id="meAvatar"><img id="meAvatarImg" class="avatar-img hidden" alt=""><span id="meAvatarInitial">U</span></div>
+          <span id="meUsername">...</span>
+          <button class="profile-dropdown-btn" id="profileDropdownBtn" title="More">•••</button>
+        </div>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <button id="changeProfilePicBtn">Change profile picture</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main chat -->
+    <main class="chat-main" id="chatMain">
+      <!-- Active chat -->
+      <div class="chat-area hidden" id="chatArea">
+        <div class="chat-header" id="chatHeader">
+          <button class="icon-btn mobile-back" id="mobileBack" aria-label="Back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="chat-header-avatar">
+            <div class="avatar" id="chatAvatar">U</div>
+          </div>
+          <div class="chat-header-info">
+            <div class="chat-header-name" id="chatHeaderName">User</div>
+            <div class="chat-header-status" id="chatHeaderStatus">
+              <span class="dot online"></span> Online
+            </div>
+          </div>
+          <button class="header-call-btn" id="callBtn" title="Video call" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="load-more-spinner hidden" id="loadMoreSpinner">
+            <span class="spinner-dot"></span>
+            <span class="spinner-dot"></span>
+            <span class="spinner-dot"></span>
+          </div>
+        </div>
+
+        <!-- Inline typing indicator -->
+        <div class="typing-banner hidden" id="typingBanner">
+          <div class="typing-dots">
+            <span class="dot-bounce"></span>
+            <span class="dot-bounce"></span>
+            <span class="dot-bounce"></span>
+          </div>
+          <span id="typingName">Someone</span> is typing...
+        </div>
+
+        <div class="reply-preview hidden" id="replyPreview">
+          <div class="reply-preview-content">
+            <div class="reply-preview-label" id="replyPreviewLabel">Replying</div>
+            <div class="reply-preview-text" id="replyPreviewText"></div>
+          </div>
+          <button type="button" class="reply-close" id="replyCloseBtn">&times;</button>
+        </div>
+
+        <div class="media-preview hidden" id="mediaPreview">
+          <div class="media-preview-thumbs" id="mediaPreviewThumbs"></div>
+          <div class="media-preview-info">
+            <span class="media-preview-name" id="mediaPreviewCount"></span>
+            <span class="media-preview-size" id="mediaPreviewTotalSize"></span>
+          </div>
+          <button type="button" class="reply-close" id="mediaPreviewClose">&times;</button>
+        </div>
+
+        <form id="messageForm" class="message-form">
+          <button type="button" id="attachBtn" class="attach-btn" title="Attach file">📎</button>
+          <input type="file" id="mediaFileInput" accept="image/png,image/jpeg,image/webp" multiple />
+          <div class="msg-input-wrap">
+            <textarea id="messageInput" placeholder="Type a message..." autocomplete="off" rows="1" disabled></textarea>
+            <button type="button" id="emojiBtn" class="emoji-btn" title="Emoji">😊</button>
+          </div>
+          <button type="submit" disabled id="sendBtn" class="send-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+        <div class="emoji-picker hidden" id="emojiPicker"></div>
+      </div>
+    </main>
+
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+
+    <!-- Video call overlay -->
+    <div class="call-overlay hidden" id="callOverlay">
+      <div class="call-header">
+        <span id="callRemoteName">User</span>
+        <span id="callDuration">00:00</span>
+      </div>
+      <video class="call-video-remote" id="remoteVideo" autoplay playsinline></video>
+      <video class="call-video-local" id="localVideo" autoplay playsinline muted></video>
+      <div class="call-actions">
+        <button class="call-btn-end" id="endCallBtn" title="End call">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Incoming call modal -->
+    <div class="incoming-call hidden" id="incomingCall">
+      <div class="incoming-call-content">
+        <div class="incoming-call-avatar" id="incomingCallAvatar">
+          <div class="avatar" id="incomingCallAvatarInner">?</div>
+        </div>
+        <div class="incoming-call-name" id="incomingCallName">User</div>
+        <div class="incoming-call-status">Incoming video call...</div>
+        <div class="incoming-call-actions">
+          <button class="call-btn-decline" id="declineCallBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Decline
+          </button>
+          <button class="call-btn-accept" id="acceptCallBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Accept
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Profile picture upload modal -->
+  <div class="profile-modal-overlay hidden" id="profileModalOverlay">
+    <div class="profile-modal">
+      <div class="profile-modal-title">Update Profile Picture</div>
+      <div class="profile-modal-preview" id="profilePreview">
+        <img id="profilePreviewImg" class="hidden" alt="">
+        <span id="profilePreviewIcon">📷</span>
+      </div>
+      <input type="file" id="profileFileInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+      <button class="profile-choose-btn" id="profileChooseBtn">Choose Photo</button>
+      <div class="profile-modal-actions">
+        <button class="profile-cancel-btn" id="profileCancelBtn">Cancel</button>
+        <button class="profile-save-btn" id="profileSaveBtn" disabled>Save</button>
+      </div>
+      <p class="profile-error hidden" id="profileError"></p>
+    </div>
+  </div>
+
+  <!-- Media preview lightbox -->
+  <div class="media-modal-overlay hidden" id="mediaModalOverlay">
+    <div class="media-modal">
+      <div class="media-modal-header">
+        <span class="media-modal-counter" id="mediaModalCounter"></span>
+        <button class="media-modal-close" id="mediaModalClose">&times;</button>
+      </div>
+      <div class="media-modal-body" id="mediaModalBody">
+        <button class="media-nav media-nav-prev" id="mediaNavPrev">‹</button>
+        <div class="media-modal-content" id="mediaModalContent"></div>
+        <button class="media-nav media-nav-next" id="mediaNavNext">›</button>
+      </div>
+      <div class="media-modal-footer">
+        <span class="media-modal-filename" id="mediaModalFilename"></span>
+        <a class="media-modal-download" id="mediaModalDownload" target="_blank" download>Download</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idle timeout modal -->
+  <div class="idle-overlay hidden" id="idleOverlay">
+    <div class="idle-modal">
+      <div class="idle-ring">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#e9edef" stroke-width="5"/>
+          <circle id="idleRing" cx="40" cy="40" r="34" fill="none" stroke="#00a884" stroke-width="5"
+            stroke-dasharray="213.6" stroke-dashoffset="0" stroke-linecap="round"
+            transform="rotate(-90 40 40)"/>
+        </svg>
+        <div class="idle-countdown" id="idleCountdown">25</div>
+      </div>
+      <div class="idle-title">Session expiring</div>
+      <div class="idle-text">You've been inactive. Stay connected by tapping below.</div>
+      <button class="idle-btn" id="idleStayBtn">I'm still here</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="/static/js/globals.js"></script>
+  <script src="/static/js/helpers.js"></script>
+  <script src="/static/js/sidebar.js"></script>
+  <script src="/static/js/conversation.js"></script>
+  <script src="/static/js/send-message.js"></script>
+  <script src="/static/js/video-call.js"></script>
+  <script src="/static/js/media.js"></script>
+  <script src="/static/js/profile.js"></script>
+  <script src="/static/js/idle.js"></script>
+  <script src="/static/js/socket-handlers.js"></script>
+  <script>
+    updateMyAvatar();
+    loadUsers().then(fetchUnreadCounts);
+  </script>
+</body>
+</html>
