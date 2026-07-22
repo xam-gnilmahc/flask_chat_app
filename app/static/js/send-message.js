@@ -40,7 +40,7 @@ async function sendMessage() {
     }));
   }
 
-  socket.emit("private_message", payload);
+  socket.emit("private_message", payload); 
   input.value = "";
   input.style.height = "auto";
   clearReply();

@@ -75,6 +75,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    return jsonify({"error": "Registration is under development. Please check back later."}), 503
     data = request.get_json(silent=True) or {}
     try:
         user = AuthService.register(
