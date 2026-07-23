@@ -6,6 +6,7 @@ class MessageService:
 
     @staticmethod
     def save_message(sender_id: int, receiver_id: int, content: str = None, reply_to: int = None, media: list = None):
+        """Insert a message into Supabase, attach media (stripping base64 data), and enrich reply metadata."""
         record = {
             "sender_id": sender_id,
             "receiver_id": receiver_id,
@@ -17,9 +18,10 @@ class MessageService:
         data = get_supabase().table("messages").insert(record).execute()
         message = data.data[0] if data.data else None
         if message and media:
-            media_records = [{**m, "message_id": message["id"]} for m in media]
+            clean = [{k: v for k, v in m.items() if k != "data"} for m in media]
+            media_records = [{**c, "message_id": message["id"]} for c in clean]
             get_supabase().table("message_media").insert(media_records).execute()
-            message["media"] = media
+            message["media"] = media_records
         if message and reply_to:
             reply_data = get_supabase().table("messages").select("id, content, sender_id").eq("id", reply_to).execute()
             if reply_data.data:
@@ -35,6 +37,7 @@ class MessageService:
 
     @staticmethod
     def get_conversation(user_a_id: int, user_b_id: int, limit: int = 30, before_id: int = None):
+        """Fetch paginated bidirectional conversation, including reply chains and media."""
         supabase = get_supabase()
         query = (
             supabase.table("messages")
@@ -135,6 +138,7 @@ class MessageService:
 
     @staticmethod
     def get_unread_counts(user_id: int) -> dict:
+        """Count unread messages grouped by sender_id."""
         data = get_supabase().table("messages").select("sender_id, is_read").eq("receiver_id", user_id).execute()
         counts = {}
         for m in data.data or []:
@@ -145,6 +149,9 @@ class MessageService:
 
     @staticmethod
     def mark_as_read(receiver_id: int, sender_id: int) -> None:
+        """Set is_read=True for all unread messages from sender to receiver."""
         get_supabase().table("messages").update({
             "is_read": True
         }).eq("receiver_id", receiver_id).eq("sender_id", sender_id).eq("is_read", False).execute()
+
+

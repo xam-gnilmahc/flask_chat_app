@@ -1,7 +1,9 @@
+// Show connection failure in header if socket can't reach server
 socket.on("connect_error", () => {
   showChatHeader("Connection failed");
 });
 
+// Update user list when someone comes online/goes offline
 socket.on("online_users_update", (payload) => {
   const otherOnlineIds = payload.online_users
     .filter(u => u.id !== me.id)
@@ -18,21 +20,10 @@ socket.on("online_users_update", (payload) => {
   setTimeout(updateCallBtnOnline, 0);
 });
 
+// Incoming message from another user — render or increment unread badge
 socket.on("new_message", (msg) => {
-  if (chatCache[msg.sender_id]) {
-    chatCache[msg.sender_id].messages.push(msg);
-  }
   if (msg.sender_id === activeUserId) {
     appendMessage(msg, false);
-    if (msg.reply_to) {
-      const parentEl = document.getElementById(`msg-${msg.reply_to}`);
-      if (parentEl) {
-        const meta = parentEl.querySelector(".meta");
-        if (meta && !meta.querySelector(".replied-badge")) {
-          meta.insertAdjacentHTML("beforeend", ' <span class="replied-badge" title="Has replies">↩</span>');
-        }
-      }
-    }
     fetch(`/api/chat/mark-read/${msg.sender_id}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
@@ -43,27 +34,17 @@ socket.on("new_message", (msg) => {
   }
 });
 
+// Confirmation that our own message was sent — render it on our side
 socket.on("message_sent", (msg) => {
-  if (chatCache[msg.receiver_id]) {
-    chatCache[msg.receiver_id].messages.push(msg);
-  }
   if (msg.receiver_id === activeUserId) {
     msg.is_read = false;
     const receiver = (window.__allUsers || []).find(u => u.id === msg.receiver_id);
     msg.delivered = receiver ? receiver.is_online : false;
     appendMessage(msg, true);
-    if (msg.reply_to) {
-      const parentEl = document.getElementById(`msg-${msg.reply_to}`);
-      if (parentEl) {
-        const meta = parentEl.querySelector(".meta");
-        if (meta && !meta.querySelector(".replied-badge")) {
-          meta.insertAdjacentHTML("beforeend", ' <span class="replied-badge" title="Has replies">↩</span>');
-        }
-      }
-    }
   }
 });
 
+// Show typing indicator when remote user is typing
 socket.on("typing", (data) => {
   if (window.__allUsers) {
     window.__allUsers.forEach(u => {
@@ -76,6 +57,7 @@ socket.on("typing", (data) => {
   showTypingBanner(data.from_user_id, data.username);
 });
 
+// Remove typing indicator when remote user stops typing
 socket.on("stop_typing", (data) => {
   if (window.__allUsers) {
     window.__allUsers.forEach(u => {
@@ -88,6 +70,7 @@ socket.on("stop_typing", (data) => {
   hideTypingBanner(data.from_user_id);
 });
 
+// Update our sent messages to blue double-check when recipient reads them
 socket.on("messages_read", (data) => {
   document.querySelectorAll(".msg.mine").forEach((el) => {
     const status = el.querySelector(".read-status");
@@ -98,6 +81,7 @@ socket.on("messages_read", (data) => {
   });
 });
 
+// Display socket-level errors in chat area for a few seconds
 socket.on("error", (err) => {
   console.error("Socket error:", err.message);
   if (err.message) {

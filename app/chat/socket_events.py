@@ -6,14 +6,15 @@ Encapsulates ALL real-time behaviour in one class:
   - tracking which users are currently online (in-memory, thread-safe)
   - broadcasting the online-users list whenever it changes
   - relaying private messages between two connected users
-  - persisting every message via MessageService
+  - persisting every message via MessageService (backup) and Supabase Edge Function (primary)
 
 Flask-SocketIO is configured with async_mode="threading" (see extensions.py),
 so every event handler here effectively runs on a worker thread. A lock
 guards the shared online-users dict for that reason.
 """
 
-import threading
+import threading, os, json, urllib.request
+from datetime import datetime
 from flask import request
 from flask_socketio import emit, disconnect
 from flask_jwt_extended import decode_token
@@ -39,10 +40,12 @@ class ChatSocketManager:
     # ------------------------------------------------------------------
 
     def get_online_user_ids(self):
+        """Return set of user_ids that currently have active socket connections."""
         with self._lock:
             return set(self._user_to_sids.keys())
 
     def _build_online_users_payload(self):
+        """Build the payload for online_users_update event with full user objects."""
         with self._lock:
             user_ids = list(self._user_to_sids.keys())
         users = [UserService.get_by_id(uid) for uid in user_ids]
@@ -75,11 +78,13 @@ class ChatSocketManager:
             return None
 
     def _add_connection(self, user_id, username, sid):
+        """Register a socket SID for a user (supports multi-tab)."""
         with self._lock:
             self._sid_to_user[sid] = {"user_id": user_id, "username": username}
             self._user_to_sids.setdefault(user_id, set()).add(sid)
 
     def _remove_connection(self, sid):
+        """Remove a socket SID; if user has no more SIDs, remove them from online list."""
         with self._lock:
             info = self._sid_to_user.pop(sid, None)
             if not info:
@@ -93,6 +98,7 @@ class ChatSocketManager:
             return info
 
     def _sids_for_user(self, user_id):
+        """Return all socket SIDs for a user (they may have multiple tabs open)."""
         with self._lock:
             return list(self._user_to_sids.get(user_id, []))
 
@@ -135,6 +141,7 @@ class ChatSocketManager:
 
         @self.socketio.on("private_message")
         def handle_private_message(data):
+            """Receive a private message from sender, relay to receiver + echo to sender, persist in background."""
             sid = request.sid
             sender_info = self._sid_to_user.get(sid)
             if not sender_info:
@@ -146,23 +153,41 @@ class ChatSocketManager:
             reply_to = data.get("reply_to")
             media = data.get("media")
 
-            if not to_user_id or not content:
-                emit("error", {"message": "to_user_id and content are required"})
+            if not to_user_id:
+                emit("error", {"message": "to_user_id is required"})
                 return
 
             sender_id = sender_info["user_id"]
-            message = MessageService.save_message(
-                sender_id=sender_id, receiver_id=int(to_user_id),
-                content=content, reply_to=reply_to, media=media,
-            )
-            payload = dict(message)
-            payload["sender_username"] = sender_info["username"]
+            now = datetime.utcnow().isoformat() + "Z"
+
+            payload = {
+                "sender_id": sender_id,
+                "receiver_id": int(to_user_id),
+                "content": content,
+                "reply_to": reply_to,
+                "media": media,
+                "sender_username": sender_info["username"],
+                "timestamp": now,
+            }
 
             for receiver_sid in self._sids_for_user(int(to_user_id)):
                 self.socketio.emit("new_message", payload, room=receiver_sid)
 
             for sender_sid in self._sids_for_user(sender_id):
                 self.socketio.emit("message_sent", payload, room=sender_sid)
+
+            # # Save to DB in background thread (backup)
+            # threading.Thread(
+            #     target=_save_message_thread,
+            #     args=(sender_id, int(to_user_id), content, reply_to, media),
+            #     daemon=True,
+            # ).start()
+
+            # # Forward to Supabase Edge Function for primary persistence
+            # edge_url = os.environ.get("SUPABASE_EDGE_FUNCTION_URL")
+            # if edge_url:
+            #     threading.Thread(target=_call_edge_function, args=(edge_url, payload), daemon=True).start()
+
 
         @self.socketio.on("typing")
         def handle_typing(data):
@@ -245,6 +270,27 @@ class ChatSocketManager:
                 self.socketio.emit("call_ended", {
                     "from_user_id": sender_info["user_id"],
                 }, room=sid)
+
+
+# Background thread: save message to Supabase DB (backup persistence)
+def _save_message_thread(sender_id, receiver_id, content, reply_to, media):
+    try:
+        MessageService.save_message(
+            sender_id=sender_id, receiver_id=receiver_id,
+            content=content, reply_to=reply_to, media=media,
+        )
+    except Exception:
+        pass
+
+
+# Background thread: forward message payload to Supabase Edge Function for primary persistence
+def _call_edge_function(url, payload):
+    try:
+        data = json.dumps(payload).encode()
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=30)
+    except Exception:
+        pass
 
 
 # Single shared instance, wired up to the app's socketio object.

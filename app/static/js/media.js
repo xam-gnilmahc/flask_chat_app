@@ -6,6 +6,10 @@ document.getElementById("mediaFileInput").addEventListener("change", (e) => {
   const files = e.target.files;
   if (!files || !files.length) return;
   for (const file of files) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image should not exceed 5MB.");
+      continue;
+    }
     pendingMedia.push({ file, file_name: file.name, file_size: file.size, file_type: "image", _preview: null });
   }
   pendingMedia.forEach(m => {
@@ -18,12 +22,14 @@ document.getElementById("mediaFileInput").addEventListener("change", (e) => {
   e.target.value = "";
 });
 
+// Clear all pending media and hide the preview bar
 document.getElementById("mediaPreviewClose").addEventListener("click", () => {
   pendingMedia.forEach(m => { if (m._preview) URL.revokeObjectURL(m._preview); });
   pendingMedia = [];
   document.getElementById("mediaPreview").classList.add("hidden");
 });
 
+// Render thumbnail previews of pending images with individual delete buttons
 function updateMediaPreview() {
   if (!pendingMedia.length) {
     document.getElementById("mediaPreview").classList.add("hidden");
@@ -32,37 +38,33 @@ function updateMediaPreview() {
   const count = pendingMedia.length;
   const totalSize = pendingMedia.reduce((s, m) => s + (m.file_size || 0), 0);
   let thumbs = "";
-  pendingMedia.forEach((m) => {
-    thumbs += `<div class="media-thumb" style="background-image:url(${m._preview})"></div>`;
+  pendingMedia.forEach((m, i) => {
+    thumbs += `<div class="media-thumb" data-index="${i}" style="background-image:url(${m._preview})"><button type="button" class="media-thumb-del" data-index="${i}">&times;</button></div>`;
   });
   document.getElementById("mediaPreviewThumbs").innerHTML = thumbs;
   document.getElementById("mediaPreviewCount").textContent =
     count === 1 ? pendingMedia[0].file_name : `${count} files`;
   document.getElementById("mediaPreviewTotalSize").textContent = formatFileSize(totalSize);
   document.getElementById("mediaPreview").classList.remove("hidden");
-}
 
-async function uploadPendingMedia() {
-  const uploads = pendingMedia.map(async (pm) => {
-    const form = new FormData();
-    form.append("file", pm.file);
-    const res = await fetch("/api/chat/upload-media", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: form,
+  document.querySelectorAll(".media-thumb-del").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.index);
+      const removed = pendingMedia.splice(idx, 1)[0];
+      if (removed && removed._preview) URL.revokeObjectURL(removed._preview);
+      updateMediaPreview();
+      if (pendingMedia.length === 0) {
+        document.getElementById("mediaFileInput").value = "";
+      }
     });
-    if (!res.ok) throw new Error((await res.json()).error || "Upload failed");
-    const data = await res.json();
-    data.file_size = pm.file_size;
-    return data;
   });
-  const results = await Promise.all(uploads);
-  return results.filter(r => r);
 }
 
 let lightboxMedia = [];
 let lightboxIndex = 0;
 
+// Open fullscreen lightbox viewer for media at given index
 function openMediaLightbox(media, index) {
   lightboxMedia = media;
   lightboxIndex = index;
@@ -71,14 +73,16 @@ function openMediaLightbox(media, index) {
   document.body.style.overflow = "hidden";
 }
 
+// Close the fullscreen lightbox viewer
 function closeMediaLightbox() {
   document.getElementById("mediaModalOverlay").classList.add("hidden");
   document.body.style.overflow = "";
 }
 
+// Render the current lightbox item (image, nav buttons, download link)
 function renderLightboxItem() {
   const m = lightboxMedia[lightboxIndex];
-  const url = `${SUPABASE_URL}/storage/v1/object/public/chat_media/${m.file_path}`;
+  const url = m.data || `${SUPABASE_URL}/storage/v1/object/public/chat_media/${m.file_path}`;
   const content = document.getElementById("mediaModalContent");
   const counter = document.getElementById("mediaModalCounter");
   const filename = document.getElementById("mediaModalFilename");

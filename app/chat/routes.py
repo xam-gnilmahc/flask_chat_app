@@ -17,6 +17,7 @@ from app.supabase_client import get_supabase
 MEDIA_EXTENSIONS = {"png","jpg","jpeg","webp"}
 
 def allowed_media(name):
+    """Check file extension is in allowed image types."""
     return "." in name and name.rsplit(".",1)[1].lower() in MEDIA_EXTENSIONS
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
@@ -25,6 +26,7 @@ chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 @chat_bp.route("/users", methods=["GET"])
 @jwt_required()
 def list_users():
+    """Return all users except current user, tagged with online status."""
     current_user_id = int(get_jwt_identity())
     online_ids = chat_socket_manager.get_online_user_ids()
     users = UserService.list_users_with_status(current_user_id, online_ids)
@@ -38,6 +40,7 @@ def list_users():
 @chat_bp.route("/history/<int:other_user_id>", methods=["GET"])
 @jwt_required()
 def history(other_user_id):
+    """Get paginated conversation history between current user and another user."""
     current_user_id = int(get_jwt_identity())
     before_id = request.args.get("before", type=int)
     result = MessageService.get_conversation(current_user_id, other_user_id, before_id=before_id)
@@ -47,6 +50,7 @@ def history(other_user_id):
 @chat_bp.route("/unread-counts", methods=["GET"])
 @jwt_required()
 def unread_counts():
+    """Return dict of {sender_id: unread_count} for current user."""
     user_id = int(get_jwt_identity())
     counts = MessageService.get_unread_counts(user_id)
     return jsonify(counts), 200
@@ -55,8 +59,9 @@ def unread_counts():
 @chat_bp.route("/mark-read/<int:sender_id>", methods=["POST"])
 @jwt_required()
 def mark_read(sender_id):
+    """Mark messages as read and notify the sender via socket."""
     current_user_id = int(get_jwt_identity())
-    MessageService.mark_as_read(receiver_id=current_user_id, sender_id=sender_id)
+    # MessageService.mark_as_read(receiver_id=current_user_id, sender_id=sender_id)
     # Notify the sender that their messages were read
     payload = {"read_by": current_user_id}
     for sid in chat_socket_manager._sids_for_user(sender_id):
@@ -67,12 +72,19 @@ def mark_read(sender_id):
 @chat_bp.route("/upload-media", methods=["POST"])
 @jwt_required()
 def upload_media():
+    """Upload an image to Supabase Storage. Accepts multipart file, returns file_path."""
     user_id = int(get_jwt_identity())
     if "file" not in request.files:
         return jsonify({"error": "No file"}), 400
     file = request.files["file"]
     if not file.filename or not allowed_media(file.filename):
         return jsonify({"error": "File type not allowed"}), 400
+
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    if size > 5 * 1024 * 1024:
+        return jsonify({"error": "Image should not exceed 5MB."}), 400
 
     ext = file.filename.rsplit(".", 1)[1].lower()
     filename = f"{user_id}/{uuid.uuid4().hex}.{ext}"

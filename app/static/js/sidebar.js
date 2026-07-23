@@ -1,11 +1,13 @@
 const sidebar = document.getElementById("sidebar");
 const overlay = document.getElementById("sidebarOverlay");
 
+// Open mobile sidebar overlay
 function openSidebar() {
   sidebar.classList.add("open");
   overlay.classList.add("open");
 }
 
+// Close mobile sidebar overlay
 function closeSidebar() {
   sidebar.classList.remove("open");
   overlay.classList.remove("open");
@@ -33,6 +35,7 @@ document.getElementById("searchInput").addEventListener("input", (e) => {
   );
 });
 
+// Fetch all users except self from API and render the sidebar
 async function loadUsers() {
   const res = await fetch("/api/chat/users", {
     headers: { Authorization: `Bearer ${token}` },
@@ -48,6 +51,7 @@ async function loadUsers() {
   renderUserList(data.users.filter(u => u.is_online).map(u => u.id));
 }
 
+// Fetch unread message counts per user and re-render the list
 async function fetchUnreadCounts() {
   try {
     const res = await fetch("/api/chat/unread-counts", {
@@ -58,6 +62,7 @@ async function fetchUnreadCounts() {
   } catch (_) {}
 }
 
+// Build the user list DOM: avatar, status dot, typing indicator, unread badge
 function renderUserList(onlineIds, filter = "") {
   const users = window.__allUsers || [];
   const list = document.getElementById("userList");
@@ -120,6 +125,7 @@ document.getElementById("changeProfilePicBtn").addEventListener("click", () => {
   document.getElementById("profileSaveBtn").disabled = true;
 });
 
+// Toggle between profile pic image and initial fallback in sidebar avatar
 function renderProfilePic(el, pic) {
   const img = el.querySelector("img");
   const initial = el.querySelector("span");
@@ -136,6 +142,7 @@ function renderProfilePic(el, pic) {
   }
 }
 
+// Refresh my own avatar in the sidebar footer
 function updateMyAvatar() {
   renderProfilePic(document.getElementById("meAvatar"), me.profile_pic);
 }

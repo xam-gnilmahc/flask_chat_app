@@ -10,9 +10,7 @@ const SUPABASE_URL = "https://xytkwpuufyxhxidaeaqn.supabase.co";
 let activeUserId = null;
 let activeUsername = null;
 let typingTimers = {};
-let replyTo = null;
 let unreadCounts = {};
-let chatCache = {};
 
 let msgIdCounter = 0;
 let selectedFile = null;
