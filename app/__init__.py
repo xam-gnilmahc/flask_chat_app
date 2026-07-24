@@ -13,6 +13,7 @@ def create_app(config_class=Config):
 
     from app.auth import auth_bp
     from app.chat import chat_bp
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(chat_bp)
 

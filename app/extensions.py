@@ -1,4 +1,4 @@
-from flask_jwt_extended import JWTManager, get_jwt
+from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
 from app.services.user_service import UserService
 

@@ -1,8 +1,6 @@
-import uuid, os, time, threading
-from werkzeug.utils import secure_filename
-
-def _safe_user(user: dict) -> dict:
-    return {k: v for k, v in user.items() if k != "password_hash"}
+import uuid
+import time
+import threading
 
 
 from flask import Blueprint, request, jsonify
@@ -14,8 +12,14 @@ from app.supabase_client import get_supabase
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
+
 def allowed_file(name):
     return "." in name and name.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _safe_user(user: dict) -> dict:
+    return {k: v for k, v in user.items() if k != "password_hash"}
+
 
 # ---- Rate limiter for login (per-IP) ----
 _login_attempts = {}  # ip -> {"count": int, "lockout_until": float}
@@ -57,6 +61,7 @@ def _reset_attempts(ip):
     with _login_lock:
         _login_attempts.pop(ip, None)
 
+
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
@@ -69,7 +74,9 @@ def register():
             email=data.get("email", "").strip(),
             password=data.get("password", ""),
         )
-        return jsonify({"message": "Registered successfully", "user": _safe_user(user)}), 201
+        return jsonify(
+            {"message": "Registered successfully", "user": _safe_user(user)}
+        ), 201
     except AuthError as e:
         return jsonify({"error": e.message}), e.status_code
 
@@ -89,11 +96,13 @@ def login():
         )
         _reset_attempts(ip)
         token = AuthService.generate_token(user)
-        return jsonify({
-            "message": "Login successful",
-            "access_token": token,
-            "user": _safe_user(user),
-        }), 200
+        return jsonify(
+            {
+                "message": "Login successful",
+                "access_token": token,
+                "user": _safe_user(user),
+            }
+        ), 200
     except AuthError as e:
         _record_failed_attempt(ip)
         return jsonify({"error": e.message}), e.status_code
@@ -130,7 +139,9 @@ def upload_profile_pic():
     ext = file.filename.rsplit(".", 1)[1].lower()
     filename = f"{user_id}/{uuid.uuid4().hex}.{ext}"
     supabase = get_supabase()
-    supabase.storage.from_("profiles").upload(filename, file.read(), {"content-type": file.content_type})
+    supabase.storage.from_("profiles").upload(
+        filename, file.read(), {"content-type": file.content_type}
+    )
     user = UserService.get_by_id(user_id)
     old = user.get("profile_pic")
     if old:

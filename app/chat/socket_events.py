@@ -13,7 +13,10 @@ so every event handler here effectively runs on a worker thread. A lock
 guards the shared online-users dict for that reason.
 """
 
-import threading, json, base64, time, uuid
+import threading
+import base64
+import time
+import uuid
 from datetime import datetime
 from flask import request
 from flask_socketio import emit, disconnect
@@ -107,8 +110,7 @@ class ChatSocketManager:
     # SocketIO event handlers
     # ------------------------------------------------------------------
 
-    def  _register_handlers(self):
-
+    def _register_handlers(self):
         @self.socketio.on("connect")
         def handle_connect(auth=None):
             decoded = self._authenticate(auth)
@@ -126,14 +128,18 @@ class ChatSocketManager:
             emit("connected", {"message": f"Welcome {username}!", "user_id": user_id})
 
             # Let everyone know the online list just changed
-            self.socketio.emit("online_users_update", self._build_online_users_payload())
+            self.socketio.emit(
+                "online_users_update", self._build_online_users_payload()
+            )
 
         @self.socketio.on("disconnect")
         def handle_disconnect():
             sid = request.sid
             info = self._remove_connection(sid)
             if info:
-                self.socketio.emit("online_users_update", self._build_online_users_payload())
+                self.socketio.emit(
+                    "online_users_update", self._build_online_users_payload()
+                )
 
         @self.socketio.on("get_online_users")
         def handle_get_online_users():
@@ -195,7 +201,10 @@ class ChatSocketManager:
             for receiver_sid in self._sids_for_user(int(to_user_id)):
                 self.socketio.emit(
                     "typing",
-                    {"from_user_id": sender_info["user_id"], "username": sender_info["username"]},
+                    {
+                        "from_user_id": sender_info["user_id"],
+                        "username": sender_info["username"],
+                    },
                     room=receiver_sid,
                 )
 
@@ -223,11 +232,15 @@ class ChatSocketManager:
                 return
             to_user_id = data.get("to_user_id")
             for sid in self._sids_for_user(int(to_user_id)):
-                self.socketio.emit("call_offer", {
-                    "from_user_id": sender_info["user_id"],
-                    "username": sender_info["username"],
-                    "sdp": data["sdp"],
-                }, room=sid)
+                self.socketio.emit(
+                    "call_offer",
+                    {
+                        "from_user_id": sender_info["user_id"],
+                        "username": sender_info["username"],
+                        "sdp": data["sdp"],
+                    },
+                    room=sid,
+                )
 
         @self.socketio.on("call_answer")
         def handle_call_answer(data):
@@ -236,10 +249,14 @@ class ChatSocketManager:
                 return
             to_user_id = data.get("to_user_id")
             for sid in self._sids_for_user(int(to_user_id)):
-                self.socketio.emit("call_answer", {
-                    "from_user_id": sender_info["user_id"],
-                    "sdp": data["sdp"],
-                }, room=sid)
+                self.socketio.emit(
+                    "call_answer",
+                    {
+                        "from_user_id": sender_info["user_id"],
+                        "sdp": data["sdp"],
+                    },
+                    room=sid,
+                )
 
         @self.socketio.on("ice_candidate")
         def handle_ice_candidate(data):
@@ -248,10 +265,14 @@ class ChatSocketManager:
                 return
             to_user_id = data.get("to_user_id")
             for sid in self._sids_for_user(int(to_user_id)):
-                self.socketio.emit("ice_candidate", {
-                    "from_user_id": sender_info["user_id"],
-                    "candidate": data["candidate"],
-                }, room=sid)
+                self.socketio.emit(
+                    "ice_candidate",
+                    {
+                        "from_user_id": sender_info["user_id"],
+                        "candidate": data["candidate"],
+                    },
+                    room=sid,
+                )
 
         @self.socketio.on("end_call")
         def handle_end_call(data):
@@ -260,9 +281,13 @@ class ChatSocketManager:
                 return
             to_user_id = data.get("to_user_id")
             for sid in self._sids_for_user(int(to_user_id)):
-                self.socketio.emit("call_ended", {
-                    "from_user_id": sender_info["user_id"],
-                }, room=sid)
+                self.socketio.emit(
+                    "call_ended",
+                    {
+                        "from_user_id": sender_info["user_id"],
+                    },
+                    room=sid,
+                )
 
 
 # Single shared instance, wired up to the app's socketio object.
@@ -277,7 +302,8 @@ def _save_message_thread(sender_id, receiver_id, content, media):
     try:
         supabase = get_supabase()
         message = MessageService.save_message(
-            sender_id=sender_id, receiver_id=receiver_id,
+            sender_id=sender_id,
+            receiver_id=receiver_id,
             content=content,
         )
         if message and media:
@@ -290,11 +316,14 @@ def _save_message_thread(sender_id, receiver_id, content, media):
                 try:
                     b64 = raw_data.split(",")[1] if "," in raw_data else raw_data
                     raw = base64.b64decode(b64)
-                    ext = (m.get("file_name") or "image.jpg").rsplit(".", 1)[-1] or "jpg"
+                    ext = (m.get("file_name") or "image.jpg").rsplit(".", 1)[
+                        -1
+                    ] or "jpg"
                     file_path = f"{sender_id}/{int(time.time() * 1000)}_{uuid.uuid4().hex}.{ext}"
                     supabase.storage.from_("chat_media").upload(
-                        file_path, raw,
-                        {"content-type": "image/jpeg", "upsert": "false"}
+                        file_path,
+                        raw,
+                        {"content-type": "image/jpeg", "upsert": "false"},
                     )
                     m["file_path"] = file_path
                     m["message_id"] = message["id"]
@@ -305,6 +334,8 @@ def _save_message_thread(sender_id, receiver_id, content, media):
                 supabase.table("message_media").insert(records).execute()
         # If receiver is online, mark message as read immediately
         if chat_socket_manager._sids_for_user(receiver_id):
-            supabase.table("messages").update({"is_read": True}).eq("id", message["id"]).execute()
+            supabase.table("messages").update({"is_read": True}).eq(
+                "id", message["id"]
+            ).execute()
     except Exception:
         pass

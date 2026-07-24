@@ -1,9 +1,7 @@
-from datetime import datetime
 from app.supabase_client import get_supabase
 
 
 class MessageService:
-
     @staticmethod
     def save_message(sender_id: int, receiver_id: int, content: str = None):
         record = {
@@ -16,7 +14,9 @@ class MessageService:
         return data.data[0] if data.data else None
 
     @staticmethod
-    def get_conversation(user_a_id: int, user_b_id: int, limit: int = 30, before_id: int = None):
+    def get_conversation(
+        user_a_id: int, user_b_id: int, limit: int = 30, before_id: int = None
+    ):
         """Fetch paginated bidirectional conversation with media."""
         supabase = get_supabase()
         query = (
@@ -33,12 +33,18 @@ class MessageService:
             query = query.lt("id", before_id)
         data = query.execute()
         messages = list(reversed(data.data))
-        existing_ids = {m["id"] for m in messages}
+        {m["id"] for m in messages}
 
         # Attach media to messages
         msg_ids = [str(m["id"]) for m in messages]
         if msg_ids:
-            media_data = get_supabase().table("message_media").select("*").in_("message_id", msg_ids).execute()
+            media_data = (
+                get_supabase()
+                .table("message_media")
+                .select("*")
+                .in_("message_id", msg_ids)
+                .execute()
+            )
             media_by_msg = {}
             for md in media_data.data or []:
                 mid = md["message_id"]
@@ -53,7 +59,13 @@ class MessageService:
     @staticmethod
     def get_unread_counts(user_id: int) -> dict:
         """Count unread messages grouped by sender_id."""
-        data = get_supabase().table("messages").select("sender_id, is_read").eq("receiver_id", user_id).execute()
+        data = (
+            get_supabase()
+            .table("messages")
+            .select("sender_id, is_read")
+            .eq("receiver_id", user_id)
+            .execute()
+        )
         counts = {}
         for m in data.data or []:
             if not m.get("is_read"):
@@ -64,8 +76,6 @@ class MessageService:
     @staticmethod
     def mark_as_read(receiver_id: int, sender_id: int) -> None:
         """Set is_read=True for all unread messages from sender to receiver."""
-        get_supabase().table("messages").update({
-            "is_read": True
-        }).eq("receiver_id", receiver_id).eq("sender_id", sender_id).eq("is_read", False).execute()
-
-
+        get_supabase().table("messages").update({"is_read": True}).eq(
+            "receiver_id", receiver_id
+        ).eq("sender_id", sender_id).eq("is_read", False).execute()

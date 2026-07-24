@@ -12,7 +12,6 @@ class AuthError(Exception):
 
 
 class AuthService:
-
     @staticmethod
     def register(username: str, email: str, password: str) -> dict:
         if not username or not email or not password:
@@ -28,7 +27,7 @@ class AuthService:
         user = UserService.create_user(username, email, password_hash)
         return user
 
-    @staticmethod 
+    @staticmethod
     def authenticate(username: str, password: str) -> dict:
         user = UserService.get_by_username(username)
         if user is None or not check_password_hash(user["password_hash"], password):

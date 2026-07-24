@@ -5,7 +5,8 @@ These complement the realtime socket events:
  - GET /api/chat/users         -> everyone + who's online right now
  - GET /api/chat/history/<id>  -> past messages with a given user
 """
-import uuid, os
+
+import uuid
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -14,11 +15,13 @@ from app.services.message_service import MessageService
 from app.chat.socket_events import chat_socket_manager
 from app.supabase_client import get_supabase
 
-MEDIA_EXTENSIONS = {"png","jpg","jpeg","webp"}
+MEDIA_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
 
 def allowed_media(name):
     """Check file extension is in allowed image types."""
-    return "." in name and name.rsplit(".",1)[1].lower() in MEDIA_EXTENSIONS
+    return "." in name and name.rsplit(".", 1)[1].lower() in MEDIA_EXTENSIONS
+
 
 chat_bp = Blueprint("chat", __name__, url_prefix="/api/chat")
 
@@ -31,10 +34,12 @@ def list_users():
     online_ids = chat_socket_manager.get_online_user_ids()
     users = UserService.list_users_with_status(current_user_id, online_ids)
     online_count = len(online_ids - {current_user_id})
-    return jsonify({
-        "users": users,
-        "online_count": online_count,
-    }), 200
+    return jsonify(
+        {
+            "users": users,
+            "online_count": online_count,
+        }
+    ), 200
 
 
 @chat_bp.route("/history/<int:other_user_id>", methods=["GET"])
@@ -43,7 +48,9 @@ def history(other_user_id):
     """Get paginated conversation history between current user and another user."""
     current_user_id = int(get_jwt_identity())
     before_id = request.args.get("before", type=int)
-    result = MessageService.get_conversation(current_user_id, other_user_id, before_id=before_id)
+    result = MessageService.get_conversation(
+        current_user_id, other_user_id, before_id=before_id
+    )
     return jsonify(result), 200
 
 
@@ -91,15 +98,22 @@ def upload_media():
     file_data = file.read()
     size = len(file_data)
     # Map content type for storage
-    ctype_map = {"png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "webp": "image/webp"}
+    ctype_map = {
+        "png": "image/png",
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "webp": "image/webp",
+    }
     supabase = get_supabase()
     supabase.storage.from_("chat_media").upload(
         filename, file_data, {"content-type": ctype_map.get(ext, "image/png")}
     )
 
-    return jsonify({
-        "file_path": filename,
-        "file_type": "image",
-        "file_name": file.filename,
-        "file_size": size,
-    }), 200
+    return jsonify(
+        {
+            "file_path": filename,
+            "file_type": "image",
+            "file_name": file.filename,
+            "file_size": size,
+        }
+    ), 200
