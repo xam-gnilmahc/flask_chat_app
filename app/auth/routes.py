@@ -57,25 +57,11 @@ def _reset_attempts(ip):
     with _login_lock:
         _login_attempts.pop(ip, None)
 
-
-# Periodically clean stale entries to avoid memory bloat
-def _cleanup_attempts():
-    now = time.time()
-    with _login_lock:
-        expired = [ip for ip, e in _login_attempts.items()
-                   if now >= e["lockout_until"] and e["count"] >= MAX_ATTEMPTS]
-        for ip in expired:
-            del _login_attempts[ip]
-
-
-threading.Thread(target=_cleanup_attempts, daemon=True).start()
-
 auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    return jsonify({"error": "Registration is under development. Please check back later."}), 503
     data = request.get_json(silent=True) or {}
     try:
         user = AuthService.register(

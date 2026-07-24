@@ -49,7 +49,6 @@ async function sendMessage() {
     payload.media = mediaItems;
   }
 
-  console.log('send message', payload);
   socket.emit("private_message", payload);
 
   input.value = "";

@@ -13,7 +13,7 @@ so every event handler here effectively runs on a worker thread. A lock
 guards the shared online-users dict for that reason.
 """
 
-import threading, os, json, urllib.request
+import threading, json, base64, time, uuid
 from datetime import datetime
 from flask import request
 from flask_socketio import emit, disconnect
@@ -22,6 +22,7 @@ from flask_jwt_extended import decode_token
 from app.extensions import socketio
 from app.services.message_service import MessageService
 from app.services.user_service import UserService
+from app.supabase_client import get_supabase
 
 
 class ChatSocketManager:
@@ -150,7 +151,6 @@ class ChatSocketManager:
 
             to_user_id = data.get("to_user_id")
             content = (data.get("content") or "").strip()
-            reply_to = data.get("reply_to")
             media = data.get("media")
 
             if not to_user_id:
@@ -164,7 +164,6 @@ class ChatSocketManager:
                 "sender_id": sender_id,
                 "receiver_id": int(to_user_id),
                 "content": content,
-                "reply_to": reply_to,
                 "media": media,
                 "sender_username": sender_info["username"],
                 "timestamp": now,
@@ -176,18 +175,12 @@ class ChatSocketManager:
             for sender_sid in self._sids_for_user(sender_id):
                 self.socketio.emit("message_sent", payload, room=sender_sid)
 
-            # # Save to DB in background thread (backup)
-            # threading.Thread(
-            #     target=_save_message_thread,
-            #     args=(sender_id, int(to_user_id), content, reply_to, media),
-            #     daemon=True,
-            # ).start()
-
-            # # Forward to Supabase Edge Function for primary persistence
-            # edge_url = os.environ.get("SUPABASE_EDGE_FUNCTION_URL")
-            # if edge_url:
-            #     threading.Thread(target=_call_edge_function, args=(edge_url, payload), daemon=True).start()
-
+            # Save to DB in background thread
+            threading.Thread(
+                target=_save_message_thread,
+                args=(sender_id, int(to_user_id), content, media),
+                daemon=True,
+            ).start()
 
         @self.socketio.on("typing")
         def handle_typing(data):
@@ -272,28 +265,46 @@ class ChatSocketManager:
                 }, room=sid)
 
 
-# Background thread: save message to Supabase DB (backup persistence)
-def _save_message_thread(sender_id, receiver_id, content, reply_to, media):
-    try:
-        MessageService.save_message(
-            sender_id=sender_id, receiver_id=receiver_id,
-            content=content, reply_to=reply_to, media=media,
-        )
-    except Exception:
-        pass
-
-
-# Background thread: forward message payload to Supabase Edge Function for primary persistence
-def _call_edge_function(url, payload):
-    try:
-        data = json.dumps(payload).encode()
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        urllib.request.urlopen(req, timeout=30)
-    except Exception:
-        pass
-
-
 # Single shared instance, wired up to the app's socketio object.
 # Imported by app/__init__.py (to make sure handlers register) and by
 # chat/routes.py (to read the live online-users state).
 chat_socket_manager = ChatSocketManager(socketio)
+
+
+# Save message to DB → upload media to storage → insert media records
+# Runs in background thread so UI stays instant
+def _save_message_thread(sender_id, receiver_id, content, media):
+    try:
+        supabase = get_supabase()
+        message = MessageService.save_message(
+            sender_id=sender_id, receiver_id=receiver_id,
+            content=content,
+        )
+        if message and media:
+            records = []
+            for m in media:
+                raw_data = m.pop("data", None)
+                if not raw_data:
+                    records.append(m)
+                    continue
+                try:
+                    b64 = raw_data.split(",")[1] if "," in raw_data else raw_data
+                    raw = base64.b64decode(b64)
+                    ext = (m.get("file_name") or "image.jpg").rsplit(".", 1)[-1] or "jpg"
+                    file_path = f"{sender_id}/{int(time.time() * 1000)}_{uuid.uuid4().hex}.{ext}"
+                    supabase.storage.from_("chat_media").upload(
+                        file_path, raw,
+                        {"content-type": "image/jpeg", "upsert": "false"}
+                    )
+                    m["file_path"] = file_path
+                    m["message_id"] = message["id"]
+                    records.append(m)
+                except Exception:
+                    pass
+            if records:
+                supabase.table("message_media").insert(records).execute()
+        # If receiver is online, mark message as read immediately
+        if chat_socket_manager._sids_for_user(receiver_id):
+            supabase.table("messages").update({"is_read": True}).eq("id", message["id"]).execute()
+    except Exception:
+        pass

@@ -52,7 +52,7 @@ Sender Client                     Server                         Receiver Client
 socket.emit(                                              
   "private_message",              
   { to_user_id, content,
-    reply_to, media }             
+    media }             
 ) ──────────────────►  MessageService.save_message()
                         │── insert into "messages" table
                         │── insert into "message_media" rows

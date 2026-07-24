@@ -433,7 +433,7 @@ body {
 }
 
 .msg {
-  max-width: 85%; padding: 8px 14px; border-radius: 12px;
+  max-width: min(85%, 480px); padding: 8px 14px; border-radius: 12px;
   line-height: 1.45; font-size: 14.5px; position: relative;
   word-break: break-word; margin-bottom: 2px; width: fit-content;
 }

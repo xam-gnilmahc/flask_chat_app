@@ -61,7 +61,7 @@ def unread_counts():
 def mark_read(sender_id):
     """Mark messages as read and notify the sender via socket."""
     current_user_id = int(get_jwt_identity())
-    # MessageService.mark_as_read(receiver_id=current_user_id, sender_id=sender_id)
+    MessageService.mark_as_read(receiver_id=current_user_id, sender_id=sender_id)
     # Notify the sender that their messages were read
     payload = {"read_by": current_user_id}
     for sid in chat_socket_manager._sids_for_user(sender_id):

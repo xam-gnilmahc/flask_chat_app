@@ -16,8 +16,6 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(chat_bp)
 
-    from app.chat import chat_socket_manager  # noqa: F401
-
     @app.route("/")
     def index():
         return render_template("login.html")
