@@ -1,17 +1,21 @@
+// Get first letter of a name for avatar fallback
 function getInitials(name) {
   return name.charAt(0).toUpperCase();
 }
 
+// Set avatar element text to initial
 function setAvatar(el, name) {
   if (el) el.textContent = getInitials(name);
 }
 
+// Sanitize string to prevent XSS by encoding HTML entities
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
 }
 
+// Generate a deterministic gradient color based on username hash
 function avatarColor(name) {
   const colors = [
     "linear-gradient(135deg, #4fff98ff, #3d67e0)",
@@ -30,12 +34,14 @@ function avatarColor(name) {
   return colors[Math.abs(hash) % colors.length];
 }
 
+// Format bytes into human-readable string (B, KB, MB)
 function formatFileSize(bytes) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
+// Compress an image file to JPEG blob with max dimensions and quality
 function compressImage(file, maxW, maxH, quality) {
   return new Promise((resolve, reject) => {
     const img = new Image();

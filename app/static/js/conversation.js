@@ -1,7 +1,9 @@
+// Set a temporary text in the chat header (e.g. connection failed)
 function showChatHeader(text) {
   document.getElementById("chatHeaderName").textContent = text;
 }
 
+// Show Online/Offline status of the currently active chat user
 function updateChatHeaderStatus() {
   const statusEl = document.getElementById("chatHeaderStatus");
   if (!activeUserId || !window.__allUsers) {
@@ -15,32 +17,6 @@ function updateChatHeaderStatus() {
     statusEl.innerHTML = '<span class="dot offline"></span> Offline';
   }
 }
-
-function replyPreviewText(msg) {
-  if (msg.content) return msg.content;
-  const m = msg.media || [];
-  if (m.length === 1) return "[📷 Image]";
-  if (m.length > 1) return "[📷 " + m.length + " images]";
-  return "";
-}
-
-function setReply(msg) {
-  if (!msg || (!msg.content && !(msg.media && msg.media.length))) return;
-  replyTo = msg.id;
-  const preview = document.getElementById("replyPreview");
-  const name = msg.sender_id === me.id ? "You" : (msg.sender_username || activeUsername || "User");
-  document.getElementById("replyPreviewLabel").textContent = `Replying to ${name}`;
-  document.getElementById("replyPreviewText").textContent = replyPreviewText(msg);
-  preview.classList.remove("hidden");
-  document.getElementById("messageInput").focus();
-}
-
-function clearReply() {
-  replyTo = null;
-  document.getElementById("replyPreview").classList.add("hidden");
-}
-
-document.getElementById("replyCloseBtn").addEventListener("click", clearReply);
 
 async function loadMoreMessages() {
   if (loadingMore || !activeHasMore || !activeUserId) return;
@@ -65,16 +41,13 @@ async function loadMoreMessages() {
     container.insertBefore(fragment, container.firstChild);
     container.scrollTop = container.scrollHeight - oldScrollHeight;
     activeHasMore = data.has_more;
-    if (chatCache[activeUserId]) {
-      chatCache[activeUserId].messages = data.messages.concat(chatCache[activeUserId].messages);
-      chatCache[activeUserId].hasMore = data.has_more;
-    }
   } finally {
     loadingMore = false;
     spinner.classList.add("hidden");
   }
 }
 
+// Detect scroll to top and trigger loadMoreMessages
 document.getElementById("chatMessages").addEventListener("scroll", () => {
   const el = document.getElementById("chatMessages");
   if (el.scrollTop < 150 && el.scrollTop < lastScrollTop) {
@@ -83,10 +56,11 @@ document.getElementById("chatMessages").addEventListener("scroll", () => {
   lastScrollTop = el.scrollTop;
 }, { passive: true });
 
+// Switch active conversation: fetch history and render messages for selected user
 async function selectUser(userId, username) {
+  if (userId === activeUserId) return;
   activeUserId = userId;
   activeUsername = username;
-  clearReply();
   activeHasMore = false;
   loadingMore = false;
   lastScrollTop = 0;
@@ -120,47 +94,39 @@ async function selectUser(userId, username) {
   const container = document.getElementById("chatMessages");
   container.querySelectorAll(".msg, .skel-list").forEach(el => el.remove());
 
-  if (chatCache[userId]) {
-    const cached = chatCache[userId];
-    cached.messages.forEach((m) => appendMessage(m, m.sender_id === me.id));
-    activeHasMore = cached.hasMore;
-  } else {
-    const skel = document.createElement("div");
-    skel.className = "skel-list";
-    skel.innerHTML = `
-      <div class="skel-row skel-theirs">
-        <div class="skel-avatar"></div>
-        <div class="skel-bubble"><div class="skel-line w70"></div><div class="skel-line w40"></div></div>
-      </div>
-      <div class="skel-row skel-theirs" style="margin-left:44px">
-        <div class="skel-bubble"><div class="skel-line w55"></div></div>
-      </div>
-      <div class="skel-row skel-mine">
-        <div class="skel-bubble"><div class="skel-line w65"></div><div class="skel-line w35"></div></div>
-      </div>
-      <div class="skel-row skel-theirs">
-        <div class="skel-avatar"></div>
-        <div class="skel-bubble"><div class="skel-line w80"></div><div class="skel-line w45"></div></div>
-      </div>
-      <div class="skel-row skel-mine">
-        <div class="skel-bubble"><div class="skel-line w50"></div></div>
-      </div>
-      <div class="skel-row skel-mine">
-        <div class="skel-bubble"><div class="skel-line w75"></div><div class="skel-line w30"></div></div>
-      </div>`;
-    container.insertBefore(skel, container.firstChild);
+  const skel = document.createElement("div");
+  skel.className = "skel-list";
+  skel.innerHTML = `
+    <div class="skel-row skel-theirs">
+      <div class="skel-avatar"></div>
+      <div class="skel-bubble"><div class="skel-line w70"></div><div class="skel-line w40"></div></div>
+    </div>
+    <div class="skel-row skel-theirs" style="margin-left:44px">
+      <div class="skel-bubble"><div class="skel-line w55"></div></div>
+    </div>
+    <div class="skel-row skel-mine">
+      <div class="skel-bubble"><div class="skel-line w65"></div><div class="skel-line w35"></div></div>
+    </div>
+    <div class="skel-row skel-theirs">
+      <div class="skel-avatar"></div>
+      <div class="skel-bubble"><div class="skel-line w80"></div><div class="skel-line w45"></div></div>
+    </div>
+    <div class="skel-row skel-mine">
+      <div class="skel-bubble"><div class="skel-line w50"></div></div>
+    </div>
+    <div class="skel-row skel-mine">
+      <div class="skel-bubble"><div class="skel-line w75"></div><div class="skel-line w30"></div></div>
+    </div>`;
+  container.insertBefore(skel, container.firstChild);
 
-    const res = await fetch(`/api/chat/history/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    container.querySelectorAll(".skel-list").forEach(el => el.remove());
+  const res = await fetch(`/api/chat/history/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  container.querySelectorAll(".skel-list").forEach(el => el.remove());
 
-    data.messages.forEach((m) => appendMessage(m, m.sender_id === me.id));
-    chatCache[userId] = { messages: data.messages, hasMore: data.has_more };
-    activeHasMore = data.has_more;
-  }
-
+  data.messages.forEach((m) => appendMessage(m, m.sender_id === me.id));
+  activeHasMore = data.has_more;
   unreadCounts[userId] = 0;
   renderUserList(window.__allUsers ? window.__allUsers.filter(u => u.is_online).map(u => u.id) : []);
   fetch(`/api/chat/mark-read/${userId}`, {
@@ -169,6 +135,7 @@ async function selectUser(userId, username) {
   });
 }
 
+// Build and insert a message bubble into the chat container
 function appendMessage(msg, isMine, targetEl) {
   const container = targetEl || document.getElementById("chatMessages");
   const div = document.createElement("div");
@@ -178,15 +145,6 @@ function appendMessage(msg, isMine, targetEl) {
 
   let html = "";
 
-  if (msg.reply_to_message) {
-    const rname = escapeHtml(msg.reply_to_message.sender_username || "Unknown");
-    const rtext = escapeHtml(replyPreviewText(msg.reply_to_message));
-    const replyId = msg.reply_to;
-    const rm = msg.reply_to_message.media || [];
-    const thumb = rm.length ? `<img src="${SUPABASE_URL}/storage/v1/object/public/chat_media/${rm[0].file_path}" class="reply-thumb">` : "";
-    html += `<span class="reply-snippet" data-reply-to="${replyId}">${thumb}<span class="reply-snippet-text"><span class="rname">${rname}</span><span class="rtext">${rtext}</span></span></span>`;
-  }
-
   const allMedia = msg.media || [];
   if (allMedia.length > 0) {
     const show = Math.min(allMedia.length, 4);
@@ -195,7 +153,7 @@ function appendMessage(msg, isMine, targetEl) {
     html += `<div class="msg-media-grid ${gridClass}">`;
     for (let i = 0; i < show; i++) {
       const m = allMedia[i];
-      const url = `${SUPABASE_URL}/storage/v1/object/public/chat_media/${m.file_path}`;
+      const url = m.data || `${SUPABASE_URL}/storage/v1/object/public/chat_media/${m.file_path}`;
       html += `<div class="media-cell" data-media-index="${i}">`;
       html += `<img src="${url}" alt="${escapeHtml(m.file_name)}" loading="lazy" />`;
       if (i === 3 && extra > 0) {
@@ -211,9 +169,6 @@ function appendMessage(msg, isMine, targetEl) {
   }
 
   let metaExtra = "";
-  if (msg.has_replies) {
-    metaExtra += ' <span class="replied-badge" title="Has replies">↩</span>';
-  }
   if (isMine) {
     const baseSvg = (stroke) => `<svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L4.5 9L11 2" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 5.5L9.5 9L16 2" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const singleSvg = (stroke) => `<svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M1 5.5L5.5 10L12 2" stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -227,29 +182,8 @@ function appendMessage(msg, isMine, targetEl) {
   }
 
   html += `<span class="meta">${new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}${metaExtra}</span>`;
-  html += `<button class="reply-arrow" title="Reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button>`;
 
   div.innerHTML = html;
-
-  const snippet = div.querySelector(".reply-snippet");
-  if (snippet) {
-    snippet.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const replyToId = snippet.dataset.replyTo;
-      const target = document.getElementById(`msg-${replyToId}`);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "center" });
-        target.style.transition = "background 0.5s ease";
-        target.style.background = "rgba(0,168,132,0.12)";
-        setTimeout(() => { target.style.background = ""; }, 1500);
-      }
-    });
-  }
-
-  div.querySelector(".reply-arrow").addEventListener("click", (e) => {
-    e.stopPropagation();
-    setReply(msg);
-  });
 
   const mediaCells = div.querySelectorAll(".media-cell[data-media-index]");
   if (mediaCells.length > 0) {
@@ -271,6 +205,7 @@ function appendMessage(msg, isMine, targetEl) {
 
 let typingBannerTimer = null;
 
+// Show "typing..." banner above the input when remote user is typing
 function showTypingBanner(userId, username) {
   if (userId !== activeUserId) return;
   const banner = document.getElementById("typingBanner");
@@ -279,6 +214,7 @@ function showTypingBanner(userId, username) {
   clearTimeout(typingBannerTimer);
 }
 
+// Hide "typing..." banner when remote user stops typing
 function hideTypingBanner(userId) {
   if (userId && userId !== activeUserId) return;
   const banner = document.getElementById("typingBanner");
@@ -322,7 +258,6 @@ document.addEventListener("click", () => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (sidebar.classList.contains("open")) closeSidebar();
-    else if (replyTo) clearReply();
-    else emojiPicker.classList.add("hidden");
+    emojiPicker.classList.add("hidden");
   }
 });

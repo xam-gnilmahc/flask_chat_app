@@ -26,4 +26,4 @@ class Config:
     JWT_HEADER_TYPE = "Bearer"
     JWT_BLOCKLIST_ENABLED = True
 
-
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024
