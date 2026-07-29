@@ -90,6 +90,7 @@ async function selectUser(userId, username) {
   }
   updateChatHeaderStatus();
   updateCallBtnOnline();
+  loadConversationBackground(userId);
 
   const container = document.getElementById("chatMessages");
   container.querySelectorAll(".msg, .skel-list").forEach(el => el.remove());
@@ -259,5 +260,115 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     if (sidebar.classList.contains("open")) closeSidebar();
     emojiPicker.classList.add("hidden");
+    document.getElementById("bgImgPicker").classList.add("hidden");
+  }
+});
+
+// ---- Chat background image ----
+
+async function loadConversationBackground(userId) {
+  try {
+    const res = await fetch(`/api/chat/background/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    const chatMessages = document.getElementById("chatMessages");
+    if (data.background_image) {
+      chatMessages.style.backgroundImage = `url(${data.background_image})`;
+      chatMessages.style.backgroundSize = "cover";
+      chatMessages.style.backgroundPosition = "center";
+      chatMessages.style.backgroundRepeat = "no-repeat";
+    } else {
+      chatMessages.style.backgroundImage = "";
+      chatMessages.style.backgroundColor = "";
+    }
+  } catch (e) {
+    console.error("Failed to load background image:", e);
+  }
+}
+
+async function setConversationBackground(userId, imageUrl) {
+  try {
+    await fetch(`/api/chat/background/${userId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ background_image: imageUrl }),
+    });
+    const chatMessages = document.getElementById("chatMessages");
+    if (imageUrl) {
+      chatMessages.style.backgroundImage = `url(${imageUrl})`;
+      chatMessages.style.backgroundSize = "cover";
+      chatMessages.style.backgroundPosition = "center";
+      chatMessages.style.backgroundRepeat = "no-repeat";
+    } else {
+      chatMessages.style.backgroundImage = "";
+      chatMessages.style.backgroundColor = "";
+    }
+    socket.emit("change_bg_image", { to_user_id: userId, image_url: imageUrl });
+  } catch (e) {
+    console.error("Failed to set background image:", e);
+  }
+}
+
+async function loadBgImages() {
+  try {
+    const res = await fetch("/api/chat/bg-images", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    const grid = document.getElementById("bgImgGrid");
+    grid.innerHTML = "";
+    if (!data.images || data.images.length === 0) {
+      grid.innerHTML = '<div class="bg-img-empty">No images available</div>';
+      return;
+    }
+    data.images.forEach((img) => {
+      const div = document.createElement("div");
+      div.className = "bg-img-thumb";
+      div.style.backgroundImage = `url(${img.url})`;
+      div.dataset.url = img.url;
+      div.title = img.name;
+      div.addEventListener("click", () => {
+        if (!activeUserId) return;
+        setConversationBackground(activeUserId, img.url);
+        document.getElementById("bgImgPicker").classList.add("hidden");
+      });
+      grid.appendChild(div);
+    });
+  } catch (e) {
+    console.error("Failed to load bg images:", e);
+  }
+}
+
+const bgImgBtn = document.getElementById("bgColorBtn");
+const bgImgPicker = document.getElementById("bgImgPicker");
+const bgImgCloseBtn = document.getElementById("bgImgCloseBtn");
+const bgImgResetBtn = document.getElementById("bgImgResetBtn");
+
+bgImgBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  bgImgPicker.classList.toggle("hidden");
+  if (!bgImgPicker.classList.contains("hidden")) {
+    loadBgImages();
+  }
+});
+
+bgImgCloseBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  bgImgPicker.classList.add("hidden");
+});
+
+bgImgResetBtn.addEventListener("click", () => {
+  if (!activeUserId) return;
+  setConversationBackground(activeUserId, null);
+  bgImgPicker.classList.add("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (!bgImgPicker.contains(e.target) && e.target !== bgImgBtn) {
+    bgImgPicker.classList.add("hidden");
   }
 });
