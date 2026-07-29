@@ -289,6 +289,27 @@ class ChatSocketManager:
                     room=sid,
                 )
 
+        @self.socketio.on("change_bg_image")
+        def handle_change_bg_image(data):
+            """Handle background image change and broadcast to the other user."""
+            sid = request.sid
+            sender_info = self._sid_to_user.get(sid)
+            if not sender_info:
+                return
+            to_user_id = data.get("to_user_id")
+            image_url = data.get("image_url")
+            if not to_user_id:
+                return
+            for receiver_sid in self._sids_for_user(int(to_user_id)):
+                self.socketio.emit(
+                    "bg_image_changed",
+                    {
+                        "from_user_id": sender_info["user_id"],
+                        "image_url": image_url,
+                    },
+                    room=receiver_sid,
+                )
+
 
 # Single shared instance, wired up to the app's socketio object.
 # Imported by app/__init__.py (to make sure handlers register) and by

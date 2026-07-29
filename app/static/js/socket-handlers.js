@@ -93,3 +93,19 @@ socket.on("error", (err) => {
     setTimeout(() => div.remove(), 4000);
   }
 });
+
+// Handle background image change from the other user in real-time
+socket.on("bg_image_changed", (data) => {
+  if (data.from_user_id === activeUserId) {
+    const chatMessages = document.getElementById("chatMessages");
+    if (data.image_url) {
+      chatMessages.style.backgroundImage = `url(${data.image_url})`;
+      chatMessages.style.backgroundSize = "cover";
+      chatMessages.style.backgroundPosition = "center";
+      chatMessages.style.backgroundRepeat = "no-repeat";
+    } else {
+      chatMessages.style.backgroundImage = "";
+      chatMessages.style.backgroundColor = "";
+    }
+  }
+});

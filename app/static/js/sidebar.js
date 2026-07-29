@@ -125,6 +125,22 @@ document.getElementById("changeProfilePicBtn").addEventListener("click", () => {
   document.getElementById("profileSaveBtn").disabled = true;
 });
 
+// Toggle sidebar collapsed/expanded
+const toggleSidebarBtn = document.getElementById("toggleSidebarBtn");
+if (localStorage.getItem("sidebar_collapsed") === "true") {
+  sidebar.classList.add("collapsed");
+}
+toggleSidebarBtn.addEventListener("click", () => {
+  sidebar.classList.toggle("collapsed");
+  localStorage.setItem("sidebar_collapsed", sidebar.classList.contains("collapsed"));
+  const svg = toggleSidebarBtn.querySelector("svg");
+  if (sidebar.classList.contains("collapsed")) {
+    svg.innerHTML = '<polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>';
+  } else {
+    svg.innerHTML = '<polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>';
+  }
+});
+
 // Toggle between profile pic image and initial fallback in sidebar avatar
 function renderProfilePic(el, pic) {
   const img = el.querySelector("img");

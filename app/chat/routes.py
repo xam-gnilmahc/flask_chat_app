@@ -7,6 +7,7 @@ These complement the realtime socket events:
 """
 
 import uuid
+import os
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -16,6 +17,7 @@ from app.chat.socket_events import chat_socket_manager
 from app.supabase_client import get_supabase
 
 MEDIA_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 
 
 def allowed_media(name):
@@ -74,6 +76,43 @@ def mark_read(sender_id):
     for sid in chat_socket_manager._sids_for_user(sender_id):
         chat_socket_manager.socketio.emit("messages_read", payload, room=sid)
     return jsonify({"message": "Marked as read"}), 200
+
+
+@chat_bp.route("/bg-images", methods=["GET"])
+@jwt_required()
+def list_bg_images():
+    """List all available background images from chat_bg_images bucket."""
+    try:
+        supabase = get_supabase()
+        files = supabase.storage.from_("chat_bg_images").list()
+        images = []
+        for f in files or []:
+            if f.get("name") and not f["name"].startswith("."):
+                public_url = f"{SUPABASE_URL}/storage/v1/object/public/chat_bg_images/{f['name']}"
+                images.append({"name": f["name"], "url": public_url})
+        return jsonify({"images": images}), 200
+    except Exception:
+        return jsonify({"images": []}), 200
+
+
+@chat_bp.route("/background/<int:other_user_id>", methods=["GET"])
+@jwt_required()
+def get_background(other_user_id):
+    """Get background image for conversation with another user."""
+    current_user_id = int(get_jwt_identity())
+    image = MessageService.get_background_image(current_user_id, other_user_id)
+    return jsonify({"background_image": image}), 200
+
+
+@chat_bp.route("/background/<int:other_user_id>", methods=["POST"])
+@jwt_required()
+def set_background(other_user_id):
+    """Set background image for conversation with another user."""
+    current_user_id = int(get_jwt_identity())
+    data = request.get_json()
+    image_path = data.get("background_image")
+    MessageService.set_background_image(current_user_id, other_user_id, image_path)
+    return jsonify({"background_image": image_path}), 200
 
 
 @chat_bp.route("/upload-media", methods=["POST"])
