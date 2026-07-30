@@ -1,0 +1,584 @@
+<mxfile host="65bd71144e">
+    <diagram id="connection" name="1. Connection">
+        <mxGraphModel dx="560" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title1" value="CLIENT-SERVER CONNECTION ESTABLISHMENT" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="20" width="500" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="browser1" value="BROWSER (Device A)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="80" width="380" height="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="server1" value="FLASK SERVER" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="80" width="380" height="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1_1" value="1. Page Loads (chat.html)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="130" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1_2" value="2. globals.js executes&#xa;   Reads JWT from localStorage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="190" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1_3" value="3. const socket = io({&#xa;       auth: { token }&#xa;     })" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="260" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow1_1" value="HTTP GET /socket.io/?token=xxx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;strokeWidth=2;strokeColor=#d35400;" parent="1" source="step1_3" target="step_server_auth" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step_server_auth" value="4. handle_connect() runs&#xa;   _authenticate(auth)&#xa;   - decode JWT token&#xa;   - extract user_id &amp; username" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="130" width="320" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="step_server_reg" value="5. _add_connection()&#xa;   _sid_to_user[sid] = {user_id, username}&#xa;   _user_to_sids[user_id].add(sid)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="220" width="320" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow_server1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="step_server_auth" target="step_server_reg" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step_server_emit1" value="6. emit(&quot;connected&quot;)&#xa;   { message, user_id }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="310" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="step_server_emit2" value="7. emit(&quot;online_users_update&quot;)&#xa;   { online_count, online_users[] }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="380" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow_server2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="step_server_reg" target="step_server_emit1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow_server3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="step_server_emit1" target="step_server_emit2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow1_2" value="emit(&quot;connected&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;strokeWidth=2;strokeColor=#27ae60;" parent="1" source="step_server_emit1" target="step1_4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow1_3" value="emit(&quot;online_users_update&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontStyle=1;strokeWidth=2;strokeColor=#27ae60;" parent="1" source="step_server_emit2" target="step1_5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1_4" value="8. Receive &quot;connected&quot;&#xa;   Connection is live!" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="350" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1_5" value="9. Receive &quot;online_users_update&quot;&#xa;   Update user list with green/gray dots" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="420" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="live_box" value="✅ CONNECTION IS NOW LIVE&#xa;All event listeners active&#xa;Ready to send/receive events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="500" width="320" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="send_message" name="2. Send Message">
+        <mxGraphModel dx="762" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title2" value="SENDING A MESSAGE — Full Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="10" width="400" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="col_a" value="DEVICE A (Sender)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="60" width="340" height="800" as="geometry"/>
+                </mxCell>
+                <mxCell id="col_s" value="SERVER" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="460" y="60" width="340" height="800" as="geometry"/>
+                </mxCell>
+                <mxCell id="col_b" value="DEVICE B (Receiver)" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="890" y="60" width="340" height="800" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_1" value="1. User types &quot;Hello&quot;&#xa;   in messageInput" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="110" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_2" value="2. input event fires&#xa;   emit(&quot;typing&quot;)&#xa;   start 2s timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="170" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_1" value="emit(&quot;typing&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_2" target="s2_s1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_s1" value="3. handle_typing()&#xa;   Relay to Device B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="490" y="170" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_2" value="emit(&quot;typing&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_s1" target="s2_b1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_b1" value="4. socket-handlers.js&#xa;   Show &quot;A is typing...&quot;&#xa;   typing indicator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="170" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_3" value="5. 2 seconds pass...&#xa;   emit(&quot;stop_typing&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="250" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_3" value="emit(&quot;stop_typing&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_3" target="s2_s2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_s2" value="6. handle_stop_typing()&#xa;   Relay to Device B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="490" y="250" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_4" value="emit(&quot;stop_typing&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_s2" target="s2_b2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_b2" value="7. socket-handlers.js&#xa;   Hide typing indicator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="250" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sep2" value="═══ USER SENDS MESSAGE ═══" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#e74c3c;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="320" width="340" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_4" value="8. User presses Enter&#xa;   sendMessage() runs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="370" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_5" value="9. Compress media (if any)&#xa;   Build payload:&#xa;   { to_user_id, content, media }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="430" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="s2_4" target="s2_5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_6" value="emit(&quot;private_message&quot;,&#xa;{to_user_id, content, media})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_5" target="s2_s3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_s3" value="10. handle_private_message()&#xa;    - Build payload&#xa;    - Find receiver SIDs&#xa;    - Emit to receiver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="490" y="380" width="280" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_7" value="emit(&quot;new_message&quot;,&#xa;{sender_id, content, timestamp})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="s2_s3" target="s2_b3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_b3" value="11. socket-handlers.js&#xa;    appendMessage(msg, false)&#xa;    Show gray bubble on LEFT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="390" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_8" value="emit(&quot;message_sent&quot;,&#xa;{sender_id, receiver_id, content})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#27ae60;fontStyle=1;fontSize=11;" parent="1" source="s2_s3" target="s2_a3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_a3" value="12. socket-handlers.js&#xa;    appendMessage(msg, true)&#xa;    Show blue bubble on RIGHT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="520" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_s4" value="13. Background thread:&#xa;    _save_message_thread()&#xa;    - Save to Supabase DB&#xa;    - Upload media to storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="490" y="480" width="280" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;dashed=1;strokeColor=#999;" parent="1" source="s2_s3" target="s2_s4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="db2" value="Supabase DB" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="590" width="120" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;dashed=1;strokeColor=#999;" parent="1" source="s2_s4" target="db2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_6" value="14. Clear input field&#xa;    Clear pendingMedia&#xa;    Stop typing indicator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="600" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="s2_a3" target="s2_6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_b4" value="15. POST /api/chat/mark-read/:aid&#xa;    Mark messages as read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="470" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="a2_12" value="POST /mark-read" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#9673a6;fontSize=11;" parent="1" source="s2_b3" target="s2_b4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_b5" value="16. Server: emit(&quot;messages_read&quot;)&#xa;    to Device A" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="540" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2_a4" value="17. messages_read event&#xa;    Update ✓✓ to BLUE (read)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="680" width="280" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="video_call" name="3. Video Call">
+        <mxGraphModel dx="772" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title3" value="VIDEO CALL — Complete WebRTC Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="10" width="450" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_col_a" value="DEVICE A (Caller)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="60" width="380" height="1100" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_col_s" value="SERVER (Relay Only)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="60" width="340" height="1100" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_col_b" value="DEVICE B (Callee)" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="930" y="60" width="380" height="1100" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_phase1" value="PHASE 1: CALL INITIATION" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#2980b9;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="80" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_1" value="1. Click Call Button" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="120" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_2" value="2. getUserMedia()&#xa;   video: 720p, audio: true" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="170" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_3" value="3. new RTCPeerConnection(ICE_SERVERS)&#xa;   STUN: stun.l.google.com:19302" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="230" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_4" value="4. addTrack(video + audio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="290" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_5" value="5. createOffer() → SDP Offer&#xa;   bumpBitrate() → 2500 kbps cap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="340" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_6" value="6. setLocalDescription(offer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="400" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_a1" value="emit(&quot;call_offer&quot;,&#xa;{to_user_id, sdp})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="vc1_6" target="vc_s1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s1" value="7. handle_call_offer()&#xa;   Relay to Device B&#xa;   + from_user_id, username" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="350" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s2" value="emit(&quot;call_offer&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="vc_s1" target="vc_b1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b1" value="8. Show incoming call popup&#xa;   Caller name + avatar&#xa;   [Accept] [Decline]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="350" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc1_7" value="9. Show call overlay&#xa;   Start timer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="460" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_phase2" value="PHASE 2: CALLEE ACCEPTS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#8e44ad;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="430" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b2" value="10. User clicks Accept&#xa;    getUserMedia() → camera + mic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="480" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b3" value="11. new RTCPeerConnection()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="540" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b4" value="12. setRemoteDescription(offer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="590" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b5" value="13. createAnswer() → SDP Answer&#xa;    bumpBitrate() → 2500 kbps cap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="640" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b6" value="14. setLocalDescription(answer)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="700" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b7" value="emit(&quot;call_answer&quot;,&#xa;{to_user_id, sdp})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#8e44ad;fontStyle=1;fontSize=11;" parent="1" source="vc_b6" target="vc_s3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s3" value="15. handle_call_answer()&#xa;    Relay to Device A" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="660" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s4" value="emit(&quot;call_answer&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#27ae60;fontStyle=1;fontSize=11;" parent="1" source="vc_s3" target="vc_a2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_a2" value="16. setRemoteDescription(answer)&#xa;    ICE checks begin" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="650" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_phase3" value="PHASE 3: ICE CANDIDATE EXCHANGE (parallel)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#e67e22;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="740" width="450" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_ice1" value="17. Browser discovers&#xa;    ICE candidates&#xa;    (network paths)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="790" width="320" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_ice_a" value="emit(&quot;ice_candidate&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e67e22;fontStyle=1;fontSize=11;" parent="1" source="vc_ice1" target="vc_s5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s5" value="18. Relay ICE candidates&#xa;    between A and B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="800" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_ice_b" value="emit(&quot;ice_candidate&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e67e22;fontStyle=1;fontSize=11;" parent="1" source="vc_b8" target="vc_s5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_b8" value="19. Browser discovers&#xa;    ICE candidates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="790" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_phase4" value="PHASE 4: DIRECT P2P CONNECTION" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#27ae60;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="870" width="350" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_p2p" value="═══════════ DIRECT P2P CONNECTION ═══════════&#xa;&#xa;Device A camera ──────────────▶ Device B sees A&#xa;Device A mic    ──────────────▶ Device B hears A&#xa;Device B camera ◀────────────── Device A sees B&#xa;Device B mic    ◀────────────── Device A hears B&#xa;&#xa;NO SERVER INVOLVED — direct peer-to-peer&#xa;Video + Audio flows directly between browsers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#27ae6666;fontSize=12;fontStyle=1;strokeWidth=3;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="910" width="750" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_phase5" value="PHASE 5: END CALL" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#e74c3c;" parent="1" vertex="1">
+                    <mxGeometry x="550" y="1060" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_end1" value="20. Click End Call&#xa;    pc.close() + stopStream" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1100" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_end_a" value="emit(&quot;end_call&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e74c3c;fontStyle=1;fontSize=11;" parent="1" source="vc_end1" target="vc_s6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_s6" value="21. handle_end_call()&#xa;    Relay as &quot;call_ended&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="530" y="1100" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_end_b" value="emit(&quot;call_ended&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e74c3c;fontStyle=1;fontSize=11;" parent="1" source="vc_s6" target="vc_end2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="vc_end2" value="22. endCall()&#xa;    pc.close() + stopStream&#xa;    Hide overlay" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="1100" width="320" height="50" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="online_status" name="4. Online Status">
+        <mxGraphModel dx="1127" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title4" value="ONLINE STATUS UPDATE FLOW" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="10" width="400" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_col_c" value="DEVICE C" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="60" width="300" height="750" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_col_s" value="SERVER" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="60" width="340" height="750" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_col_a" value="DEVICE A &amp; B" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="920" y="60" width="340" height="750" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_phase1" value="PHASE 1: C CONNECTS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#27ae60;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="80" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="os1_1" value="1. Opens chat page&#xa;   globals.js creates socket" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="120" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_a1" value="connect(auth: {token})" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#d35400;fontStyle=1;fontSize=11;" parent="1" source="os1_1" target="os_s1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s1" value="2. Validate JWT&#xa;   _add_connection()&#xa;   Register SID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="120" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s2" value="3. emit(&quot;connected&quot;)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="200" width="280" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s3" value="4. Build online users list&#xa;   _user_to_sids.keys()&#xa;   Fetch user objects from DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="250" width="280" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s4" value="5. emit(&quot;online_users_update&quot;)&#xa;   { online_count, online_users[] }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="320" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_a2" value="Broadcast to ALL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#27ae60;fontStyle=1;fontSize=11;" parent="1" source="os_s4" target="os_ab1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_ab1" value="6. socket-handlers.js&#xa;   - Update online count&#xa;   - Set is_online flags&#xa;   - Re-render user list&#xa;   - Update header status&#xa;   - Enable call buttons" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="950" y="120" width="280" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_phase2" value="PHASE 2: C DISCONNECTS" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=3;fontColor=#e74c3c;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="450" width="250" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="os2_1" value="7. Closes tab or&#xa;   loses network" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="490" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_a3" value="disconnect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e74c3c;fontStyle=1;fontSize=11;" parent="1" source="os2_1" target="os_s5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s5" value="8. handle_disconnect()&#xa;   _remove_connection()&#xa;   Remove SID from memory&#xa;   If no more SIDs → remove user" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="490" width="280" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_s6" value="9. emit(&quot;online_users_update&quot;)&#xa;   { online_count, online_users[] }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="600" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_a4" value="Broadcast to ALL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#e74c3c;fontStyle=1;fontSize=11;" parent="1" source="os_s6" target="os_ab2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_ab2" value="10. socket-handlers.js&#xa;    - C is now offline&#xa;    - Re-render user list&#xa;    - Disable call button for C" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8d7da;strokeColor=#e74c3c;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="950" y="550" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_a5" value="emit(&quot;connected&quot;)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#27ae60;fontStyle=1;fontSize=11;dashed=1;" parent="1" source="os_s2" target="os_c1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="os_c1" value="11. Receive &quot;connected&quot;&#xa;    Connection live" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="200" width="260" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="system" name="5. Complete System">
+        <mxGraphModel dx="762" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title5" value="COMPLETE SYSTEM ARCHITECTURE" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="10" width="400" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_browser" value="BROWSER" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="60" width="700" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_globals" value="globals.js&#xa;Socket + Auth + Vars" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="110" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_helpers" value="helpers.js&#xa;Utilities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="180" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_sidebar" value="sidebar.js&#xa;User List" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="110" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_convo" value="conversation.js&#xa;Chat Area" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="170" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_send" value="send-message.js&#xa;Message Input" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="230" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_video" value="video-call.js&#xa;WebRTC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="110" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_media" value="media.js&#xa;Images" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="170" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_profile" value="profile.js&#xa;Avatar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="230" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_idle" value="idle.js&#xa;Timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="110" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_handlers" value="socket-handlers.js&#xa;ALL Event Listeners" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="170" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_socket" value="socket (io connection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="320" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="sys_handlers" target="sys_socket" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="sys_send" target="sys_socket" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="sys_video" target="sys_socket" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow_main" value="Socket.IO (WebSocket)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=3;strokeColor=#d35400;fontStyle=1;fontSize=14;" parent="1" source="sys_socket" target="sys_server_events" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_server" value="FLASK SERVER" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="520" width="700" height="250" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_server_events" value="socket_events.py&#xa;ChatSocketManager" style="swimlane;startSize=40;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="570" width="320" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_memory" value="_sid_to_user&#xa;_user_to_sids&#xa;(In-Memory)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="630" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_routes" value="REST API Routes&#xa;/api/auth/*&#xa;/api/chat/*" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="570" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;dashed=1;strokeColor=#999;" parent="1" source="sys_routes" target="sys_supabase" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;dashed=1;strokeColor=#999;" parent="1" source="sys_server_events" target="sys_supabase" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_supabase" value="SUPABASE (Cloud)" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="820" width="700" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_db" value="PostgreSQL DB&#xa;- users&#xa;- messages&#xa;- message_media&#xa;- conversations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="870" width="280" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_storage" value="Storage&#xa;- profiles/&#xa;- chat_media/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="870" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_label1" value="EMITS:&#xa;- private_message&#xa;- typing / stop_typing&#xa;- call_offer / call_answer&#xa;- ice_candidate / end_call&#xa;- change_bg_image" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="200" width="180" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_label2" value="RECEIVES:&#xa;- connected&#xa;- online_users_update&#xa;- new_message&#xa;- message_sent&#xa;- messages_read&#xa;- typing / stop_typing&#xa;- call_offer / call_answer&#xa;- ice_candidate / call_ended&#xa;- bg_image_changed" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="340" width="200" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="sys_label3" value="HANDLES:&#xa;- connect / disconnect&#xa;- private_message&#xa;- typing / stop_typing&#xa;- call_offer / call_answer&#xa;- ice_candidate / end_call&#xa;- change_bg_image&#xa;- get_online_users" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="780" y="580" width="180" height="130" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="load_order" name="6. Load Order">
+        <mxGraphModel dx="772" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title6" value="SCRIPT LOAD ORDER (chat.html)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="350" y="10" width="400" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_cdn" value="Line 244: socket.io.min.js (CDN)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="70" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow0" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_cdn" target="lo_1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_1" value="Line 245: globals.js  (Foundation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="140" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_1_desc" value="Creates: socket, me, token, activeUserId&#xa;+ all global variables" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="140" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_1" target="lo_2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_2" value="Line 246: helpers.js  (Utilities)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="210" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_2_desc" value="Pure functions: escapeHtml, avatarColor,&#xa;compressImage, getInitials" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="210" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_2" target="lo_3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_3" value="Line 247: sidebar.js  (User List)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="280" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_3_desc" value="loadUsers, renderUserList, search,&#xa;logout, mobile menu" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="280" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_3" target="lo_4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_4" value="Line 248: conversation.js  (Chat Area)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="350" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_4_desc" value="selectUser, appendMessage, emoji,&#xa;backgrounds, typing banner" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="350" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_4" target="lo_5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_5" value="Line 249: send-message.js  (Message Input)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="420" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_5_desc" value="sendMessage, typing indicator,&#xa;autoResize, Enter to send" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="420" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_5" target="lo_6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_6" value="Line 250: video-call.js  (WebRTC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="490" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_6_desc" value="getUserMedia, RTCPeerConnection,&#xa;SDP offer/answer, ICE, call overlay" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="490" width="270" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_6" target="lo_7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_7" value="Line 251: media.js  (Images)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="560" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_7_desc" value="File attach, preview bar,&#xa;fullscreen lightbox" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="560" width="220" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_7" target="lo_8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_8" value="Line 252: profile.js  (Avatar)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="630" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_8_desc" value="Profile picture upload,&#xa;compress, preview" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="630" width="200" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_8" target="lo_9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_9" value="Line 253: idle.js  (Timeout)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="700" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_9_desc" value="5 min idle warning,&#xa;auto-logout" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="700" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_arrow9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="lo_9" target="lo_10" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_10" value="Line 254: socket-handlers.js  (Event Hub) ⭐ LOADS LAST" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;strokeWidth=3;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="770" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_10_desc" value="ALL incoming event listeners&#xa;message, typing, online, read" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="660" y="770" width="260" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lo_note" value="WHY ORDER MATTERS:&#xa;- globals.js must be first (creates socket + globals)&#xa;- All files depend on globals.js variables&#xa;- socket-handlers.js loads LAST so all handlers are defined&#xa;- video-call.js handles its own events (complex module)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="860" width="540" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
