@@ -1,45 +1,26 @@
 """
-Pusher Beams Service — Push notifications via Pusher Beams REST API
-═══════════════════════════════════════════════════════════════════════
-
-Server-side:
-  - Token generation: SDK's generate_token() creates JWT for client auth
-  - Sending notifications: REST API directly (avoids SDK recursion bug)
-
-Client-side:
-  - setUserId() + TokenProvider authenticates device to a user
-  - pusher.js fetches token from /api/chat/beams-token
-  - sw.js shows the notification in browser
+Pusher Beams Service — Push notifications via REST API (no SDK dependency)
 """
 
+import time
 import logging
 import jwt
 import requests
-from pusher_push_notifications import PushNotifications
 
 logger = logging.getLogger(__name__)
 
-_pusher_client = None
 _instance_id = ""
 _secret_key = ""
 
 
 def init_pusher(instance_id: str, secret_key: str):
-    """Initialize Pusher Beams client for token generation."""
-    global _pusher_client, _instance_id, _secret_key
-
+    global _instance_id, _secret_key
     if not instance_id or not secret_key or instance_id == "YOUR_INSTANCE_ID_HERE":
         logger.warning("Pusher Beams not configured — push notifications disabled")
         return
-
-    try:
-        _pusher_client = PushNotifications(instance_id, secret_key)
-        _instance_id = instance_id
-        _secret_key = secret_key
-        logger.info("Pusher Beams initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize Pusher Beams: {e}")
-        _pusher_client = None
+    _instance_id = instance_id
+    _secret_key = secret_key
+    logger.info("Pusher Beams initialized successfully")
 
 
 def get_instance_id() -> str:
@@ -47,23 +28,29 @@ def get_instance_id() -> str:
 
 
 def generate_beams_token(user_id: int) -> str:
-    """
-    Generate Pusher Beams JWT token for client-side setUserId().
-    Uses SDK's generate_token() — cannot use raw jwt.encode() here.
-    """
-    if not _pusher_client:
+    """Generate Beams JWT manually — issuer must be the full Beams URL."""
+    if not _instance_id or not _secret_key:
         return ""
 
+    now = int(time.time())
+    payload = {
+        "sub": f"user_{user_id}",
+        "iss": f"https://{_instance_id}.pushnotifications.pusher.com",
+        "exp": now + 86400,
+        "iat": now,
+        "interests": [f"user_{user_id}"],
+    }
+
     try:
-        beams_token = _pusher_client.generate_token(f"user_{user_id}")
-        return beams_token["token"]
+        token = jwt.encode(payload, _secret_key, algorithm="HS256")
+        return token
     except Exception as e:
-        logger.error(f"Failed to generate Beams token for user {user_id}: {e}")
+        print(f"Failed to generate Beams token: {e}")
         return ""
 
 
 def send_notification(user_id: str, title: str, body: str, data: dict = None):
-    """Send push notification via Pusher Beams REST API (bypasses SDK bug)."""
+    """Send push notification via Pusher Beams REST API."""
     if not _instance_id or not _secret_key:
         print("Pusher Beams not configured — skipping notification")
         return False
@@ -99,7 +86,6 @@ def send_notification(user_id: str, title: str, body: str, data: dict = None):
 
 
 def send_message_notification(receiver_id: int, sender_username: str, message_content: str):
-    """Send new message notification to a user."""
     truncated = message_content[:100] + "..." if len(message_content) > 100 else message_content
     if not truncated:
         truncated = "Photo"
