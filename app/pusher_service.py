@@ -61,7 +61,7 @@ def send_notification(user_id: str, title: str, body: str, data: dict = None):
             "notification": {
                 "title": title,
                 "body": body,
-                "icon": "https://cdn-icons-png.flaticon.com/512/1827/1827933.png",
+                "icon": "https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTA0L3N0YXJ0dXBpbWFnZXNfM2RfcmVuZGVyX29mX2FfbGV0dGVyX21fZmxhdF9sYXlfdG9wX3ZpZXdfdmVyeV90aF83YWU3YmExOC04NGYyLTRlNjktYWZlMS01MGRkYzM1YTMwZjIucG5n.png",
                 "data": data or {},
             }
         },

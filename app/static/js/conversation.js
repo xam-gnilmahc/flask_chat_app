@@ -59,6 +59,12 @@ document.getElementById("chatMessages").addEventListener("scroll", () => {
 // Switch active conversation: fetch history and render messages for selected user
 async function selectUser(userId, username) {
   if (userId === activeUserId) return;
+
+  // Tell server we left the previous chat (so push notifications can be sent)
+  if (activeUserId && socket && socket.connected) {
+    socket.emit("leave_chat");
+  }
+
   activeUserId = userId;
   activeUsername = username;
   activeHasMore = false;
@@ -70,6 +76,11 @@ async function selectUser(userId, username) {
   [...document.getElementById("userList").children].forEach((li) => li.classList.remove("active"));
 
   if (!userId) return;
+
+  // Tell server which chat we're now viewing (suppress push for this chat)
+  if (socket && socket.connected) {
+    socket.emit("viewing_chat", { chat_with_user_id: userId });
+  }
 
   document.getElementById("messageInput").disabled = false;
   document.getElementById("sendBtn").disabled = true;
@@ -166,7 +177,8 @@ function appendMessage(msg, isMine, targetEl) {
   }
 
   if (msg.content) {
-    html += escapeHtml(msg.content);
+    const textId = `msg-text-${msg.id || msgIdCounter}`;
+    html += `<div class="msg-text collapsed" id="${textId}">${escapeHtml(msg.content)}</div>`;
   }
 
   let metaExtra = "";
@@ -201,6 +213,28 @@ function appendMessage(msg, isMine, targetEl) {
   container.appendChild(div);
   if (!targetEl) {
     container.scrollTop = container.scrollHeight;
+  }
+
+  // Add read more/less toggle for long messages
+  if (msg.content) {
+    const textEl = div.querySelector(".msg-text");
+    if (textEl) {
+      textEl.classList.remove("collapsed");
+      textEl.offsetHeight; // force reflow
+      const fullHeight = textEl.scrollHeight;
+      if (fullHeight > 90) {
+        textEl.classList.add("collapsed");
+        const toggle = document.createElement("button");
+        toggle.className = "msg-toggle";
+        toggle.textContent = "Read more";
+        toggle.addEventListener("click", () => {
+          const isCollapsed = textEl.classList.contains("collapsed");
+          textEl.classList.toggle("collapsed");
+          toggle.textContent = isCollapsed ? "Read less" : "Read more";
+        });
+        textEl.parentNode.insertBefore(toggle, textEl.nextSibling);
+      }
+    }
   }
 }
 

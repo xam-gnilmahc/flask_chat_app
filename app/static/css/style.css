@@ -710,6 +710,9 @@ body {
   color: #667781;
 }
 .msg.mine .meta { color: #667781; }
+
+/* Media messages: auto-width to fit content */
+.msg:has(.msg-media-grid) { width: auto; }
 .replied-badge { font-size: 11px; margin-left: 4px; cursor: default; }
 .read-status { display: inline-block; margin-left: 4px; font-size: 11px; font-weight: 600; letter-spacing: -1px; opacity: 1; }
 .read-status.read { color: #53bdeb; }
@@ -848,20 +851,40 @@ input[type="file"] { display: none; }
 .media-preview-name { font-size: 13px; color: #111b21; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .media-preview-size { font-size: 11px; color: #667781; white-space: nowrap; }
 
-/* Media inside message bubbles */
+/* Media inside message bubbles - WhatsApp style */
 .msg-media-grid {
-  display: grid; gap: 2px; margin-bottom: 6px; border-radius: 8px; overflow: hidden;
-  max-width: 280px; cursor: pointer;
+  display: grid; gap: 2px; margin: -4px -6px 6px -6px;
+  border-radius: 8px; overflow: hidden;
 }
 .msg-media-grid.single { grid-template-columns: 1fr; }
 .msg-media-grid.pair { grid-template-columns: 1fr 1fr; }
 .msg-media-grid.multi { grid-template-columns: 1fr 1fr; }
 .msg-media-grid .media-cell {
-  position: relative; overflow: hidden; aspect-ratio: 1; background: #e9edef;
+  position: relative; overflow: hidden; background: #e9edef;
+  width: 280px; height: 200px;
 }
+.msg-media-grid.single .media-cell { width: 300px; height: 225px; }
 .msg-media-grid .media-cell img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
+
+/* Read more / read less for long messages */
+.msg-text {
+  position: relative; display: block;
+}
+.msg-text.collapsed {
+  max-height: 80px; overflow: hidden;
+}
+.msg-text.collapsed::after {
+  content: ""; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 30px; background: linear-gradient(transparent, inherit);
+  pointer-events: none;
+}
+.msg-toggle {
+  background: none; border: none; color: #00a884; font-size: 12px;
+  cursor: pointer; padding: 2px 0; font-weight: 500; display: inline-block;
+}
+.msg-toggle:hover { text-decoration: underline; }
 .msg-media-grid .media-cell .media-overlay {
   position: absolute; inset: 0; background: rgba(0,0,0,0.6);
   display: flex; align-items: center; justify-content: center;
