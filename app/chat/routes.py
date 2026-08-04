@@ -162,15 +162,10 @@ def upload_media():
 @jwt_required()
 def beams_token():
     """Return Pusher Beams auth token for the current user."""
-    import logging
-    from app.pusher_service import generate_beams_token, get_instance_id, _pusher_client
+    from app.pusher_service import generate_beams_token
 
-    log = logging.getLogger(__name__)
     user_id = int(get_jwt_identity())
-    log.warning(f"DEBUG: _pusher_client={_pusher_client}")
-    log.warning(f"DEBUG: instance_id={get_instance_id()}")
     beams_token = generate_beams_token(user_id)
-    log.warning(f"DEBUG: token={beams_token[:80] if beams_token else 'EMPTY'}")
     return jsonify({"token": beams_token}), 200
 
 
