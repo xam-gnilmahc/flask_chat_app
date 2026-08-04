@@ -73,7 +73,11 @@ class ChatSocketManager:
         # Example: {42: {"abc123", "def456"}}  → user 42 has 2 tabs open
         self._user_to_sids = {}
 
-        # Thread-safe lock — protects the two dicts above from concurrent modification
+        # Maps user_id → chat_with_user_id
+        # Tracks which chat each user is currently viewing (e.g. {42: 7})
+        self._user_viewing = {}
+
+        # Thread-safe lock — protects the dicts above from concurrent modification
         # (Flask-SocketIO runs each handler on a separate worker thread)
         self._lock = threading.Lock()
 
@@ -263,6 +267,9 @@ class ChatSocketManager:
             # Remove this SID from tracking — if user has no more SIDs, they're offline
             info = self._remove_connection(sid)
             if info:
+                # Clean up viewing state
+                with self._lock:
+                    self._user_viewing.pop(info["user_id"], None)
                 # Broadcast updated online list to all remaining clients
                 self.socketio.emit(
                     "online_users_update", self._build_online_users_payload()
@@ -336,10 +343,15 @@ class ChatSocketManager:
             for receiver_sid in receiver_sids:
                 self.socketio.emit("new_message", payload, room=receiver_sid)
 
-            # ─── PUSH NOTIFICATION (if receiver is offline) ────────────
-            # If the receiver has NO connected tabs/devices, send a push notification
-            # This ensures they get notified even when the browser is closed
-            if not receiver_sids:
+            # ─── PUSH NOTIFICATION ────────────────────────────────────
+            # Send push notification ONLY if:
+            #   1. Receiver has NO connected tabs (offline) → DON'T send
+            #      (user will see messages when they come back)
+            #   2. Receiver IS online but NOT viewing this chat → SEND
+            #      (user is on a different tab or different chat — like WhatsApp)
+            with self._lock:
+                viewing_chat = self._user_viewing.get(int(to_user_id))
+            if receiver_sids and viewing_chat != sender_id:
                 threading.Thread(
                     target=send_message_notification,
                     args=(int(to_user_id), sender_info["username"], content),
@@ -414,6 +426,39 @@ class ChatSocketManager:
                     {"from_user_id": sender_info["user_id"]},
                     room=receiver_sid,
                 )
+
+        # ═══════════════════════════════════════════════════════════════════
+        # EVENT: viewing_chat — User opened a chat conversation
+        # ═══════════════════════════════════════════════════════════════════
+        #
+        # WHAT HAPPENS:
+        #   Device A opens chat with User B → emits "viewing_chat"
+        #   Server records that User A is currently viewing chat with User B
+        #   Used to decide push notification: if online but NOT viewing → notify
+        # ═══════════════════════════════════════════════════════════════════
+        @self.socketio.on("viewing_chat")
+        def handle_viewing_chat(data):
+            """Track which chat the user is currently viewing."""
+            sid = request.sid
+            sender_info = self._sid_to_user.get(sid)
+            if not sender_info:
+                return
+            chat_with = data.get("chat_with_user_id")
+            with self._lock:
+                self._user_viewing[sender_info["user_id"]] = int(chat_with) if chat_with else None
+
+        # ═══════════════════════════════════════════════════════════════════
+        # EVENT: leave_chat — User closed/left a chat conversation
+        # ═══════════════════════════════════════════════════════════════════
+        @self.socketio.on("leave_chat")
+        def handle_leave_chat():
+            """Clear the user's current chat viewing state."""
+            sid = request.sid
+            sender_info = self._sid_to_user.get(sid)
+            if not sender_info:
+                return
+            with self._lock:
+                self._user_viewing.pop(sender_info["user_id"], None)
 
         # ═══════════════════════════════════════════════════════════════════
         # EVENT: call_offer — Device A wants to start a video call with Device B
