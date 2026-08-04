@@ -27,3 +27,7 @@ class Config:
     JWT_BLOCKLIST_ENABLED = True
 
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
+
+    # --- Pusher Beams (Push Notifications) ---
+    PUSHER_BEAMS_INSTANCE_ID = os.environ.get("PUSHER_BEAMS_INSTANCE_ID", "")
+    PUSHER_BEAMS_SECRET_KEY = os.environ.get("PUSHER_BEAMS_SECRET_KEY", "")
