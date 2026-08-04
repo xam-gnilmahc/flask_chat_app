@@ -711,12 +711,9 @@ def _save_message_thread(sender_id, receiver_id, content, media):
             if records:
                 supabase.table("message_media").insert(records).execute()
 
-        # Step 3: If the receiver is online, mark the message as read immediately
-        # (They probably already saw it appear in real-time)
-        if chat_socket_manager._sids_for_user(receiver_id):
-            supabase.table("messages").update({"is_read": True}).eq(
-                "id", message["id"]
-            ).execute()
+        # NOTE: Messages are only marked as read when the receiver OPENS the chat
+        # (via the /api/chat/mark-read endpoint called from the client).
+        # NOT when they're just online.
 
     except Exception:
         pass  # Silently handle any errors (message is already delivered via socket)
