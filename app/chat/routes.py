@@ -156,3 +156,29 @@ def upload_media():
             "file_size": size,
         }
     ), 200
+
+
+@chat_bp.route("/beams-token", methods=["GET", "POST"])
+@jwt_required()
+def beams_token():
+    """Return Pusher Beams auth token for the current user."""
+    import logging
+    from app.pusher_service import generate_beams_token, get_instance_id, _pusher_client
+
+    log = logging.getLogger(__name__)
+    user_id = int(get_jwt_identity())
+    log.warning(f"DEBUG: _pusher_client={_pusher_client}")
+    log.warning(f"DEBUG: instance_id={get_instance_id()}")
+    beams_token = generate_beams_token(user_id)
+    log.warning(f"DEBUG: token={beams_token[:80] if beams_token else 'EMPTY'}")
+    return jsonify({"token": beams_token}), 200
+
+
+@chat_bp.route("/beams-config", methods=["GET"])
+@jwt_required()
+def beams_config():
+    """Return Pusher Beams instance ID."""
+    from app.pusher_service import get_instance_id
+
+    instance_id = get_instance_id()
+    return jsonify({"instance_id": instance_id}), 200

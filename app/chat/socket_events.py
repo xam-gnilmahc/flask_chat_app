@@ -54,6 +54,7 @@ from app.extensions import socketio
 from app.services.message_service import MessageService
 from app.services.user_service import UserService
 from app.supabase_client import get_supabase
+from app.pusher_service import send_message_notification
 
 
 class ChatSocketManager:
@@ -225,9 +226,9 @@ class ChatSocketManager:
                 return False
 
             # Step 2: Extract user info from the decoded token
-            user_id = int(decoded["sub"])       # "sub" claim = user_id
+            user_id = int(decoded["sub"])  # "sub" claim = user_id
             username = decoded.get("username", "unknown")
-            sid = request.sid                    # Unique socket session ID
+            sid = request.sid  # Unique socket session ID
 
             # Step 3: Register this connection in our in-memory state
             self._add_connection(user_id, username, sid)
@@ -331,8 +332,19 @@ class ChatSocketManager:
             # ─── RELAY TO RECEIVER ─────────────────────────────────────
             # Send "new_message" to ALL of the receiver's connected tabs/devices
             # This ensures the message appears on phone, laptop, etc.
-            for receiver_sid in self._sids_for_user(int(to_user_id)):
+            receiver_sids = self._sids_for_user(int(to_user_id))
+            for receiver_sid in receiver_sids:
                 self.socketio.emit("new_message", payload, room=receiver_sid)
+
+            # ─── PUSH NOTIFICATION (if receiver is offline) ────────────
+            # If the receiver has NO connected tabs/devices, send a push notification
+            # This ensures they get notified even when the browser is closed
+            if not receiver_sids:
+                threading.Thread(
+                    target=send_message_notification,
+                    args=(int(to_user_id), sender_info["username"], content),
+                    daemon=True,
+                ).start()
 
             # ─── CONFIRM TO SENDER ────────────────────────────────────
             # Send "message_sent" back to ALL of the sender's connected tabs/devices
@@ -434,8 +446,8 @@ class ChatSocketManager:
                     "call_offer",
                     {
                         "from_user_id": sender_info["user_id"],  # Who is calling
-                        "username": sender_info["username"],      # For display in popup
-                        "sdp": data["sdp"],                       # The SDP offer (unmodified)
+                        "username": sender_info["username"],  # For display in popup
+                        "sdp": data["sdp"],  # The SDP offer (unmodified)
                     },
                     room=sid,
                 )
@@ -474,7 +486,7 @@ class ChatSocketManager:
                     "call_answer",
                     {
                         "from_user_id": sender_info["user_id"],  # Who answered
-                        "sdp": data["sdp"],                       # The SDP answer (unmodified)
+                        "sdp": data["sdp"],  # The SDP answer (unmodified)
                     },
                     room=sid,
                 )
@@ -506,8 +518,12 @@ class ChatSocketManager:
                 self.socketio.emit(
                     "ice_candidate",
                     {
-                        "from_user_id": sender_info["user_id"],  # Who sent this candidate
-                        "candidate": data["candidate"],           # The ICE candidate (unmodified)
+                        "from_user_id": sender_info[
+                            "user_id"
+                        ],  # Who sent this candidate
+                        "candidate": data[
+                            "candidate"
+                        ],  # The ICE candidate (unmodified)
                     },
                     room=sid,
                 )
@@ -627,7 +643,9 @@ def _save_message_thread(sender_id, receiver_id, content, media):
                     raw = base64.b64decode(b64)
 
                     # Generate a unique file path: {user_id}/{timestamp}_{random}.ext
-                    ext = (m.get("file_name") or "image.jpg").rsplit(".", 1)[-1] or "jpg"
+                    ext = (m.get("file_name") or "image.jpg").rsplit(".", 1)[
+                        -1
+                    ] or "jpg"
                     file_path = f"{sender_id}/{int(time.time() * 1000)}_{uuid.uuid4().hex}.{ext}"
 
                     # Upload to Supabase Storage
