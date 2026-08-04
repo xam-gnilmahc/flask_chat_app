@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="connection" name="1. Connection">
-        <mxGraphModel dx="560" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="1367" dy="703" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -65,7 +65,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="send_message" name="2. Send Message">
-        <mxGraphModel dx="762" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+        <mxGraphModel dx="1367" dy="703" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -178,7 +178,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="video_call" name="3. Video Call">
-        <mxGraphModel dx="772" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+        <mxGraphModel dx="1367" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -306,7 +306,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="online_status" name="4. Online Status">
-        <mxGraphModel dx="1127" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="1099" dy="509" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -380,7 +380,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="system" name="5. Complete System">
-        <mxGraphModel dx="762" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1367" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -475,7 +475,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="load_order" name="6. Load Order">
-        <mxGraphModel dx="772" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
+        <mxGraphModel dx="1367" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -577,6 +577,146 @@
                 </mxCell>
                 <mxCell id="lo_note" value="WHY ORDER MATTERS:&#xa;- globals.js must be first (creates socket + globals)&#xa;- All files depend on globals.js variables&#xa;- socket-handlers.js loads LAST so all handlers are defined&#xa;- video-call.js handles its own events (complex module)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" parent="1" vertex="1">
                     <mxGeometry x="100" y="860" width="540" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="pusher_beams" name="7. Pusher Beams">
+        <mxGraphModel dx="1367" dy="703" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1400" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="pb_title" value="PUSHER BEAMS — PUSH NOTIFICATION INITIALIZATION" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="10" width="600" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_server" value="FLASK SERVER (Python)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="60" width="800" height="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s_phase1" value="PHASE 1: APP STARTUP (once)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#27ae60;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="100" width="250" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s1" value="1. python run.py&#xa;   app = create_app()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="130" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s2" value="2. init_pusher(instance_id, secret_key)&#xa;   Reads PUSHER_BEAMS_INSTANCE_ID&#xa;   Reads PUSHER_BEAMS_SECRET_KEY from .env" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="185" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s3" value="3. _pusher_client = PushNotifications(&#xa;       instance_id, secret_key&#xa;   )&#xa;   SDK validates credentials with Pusher" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="260" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s1" target="pb_s2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s2" target="pb_s3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s_phase2" value="PHASE 2: TOKEN ENDPOINT (per user login)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#e67e22;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="360" width="350" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s4" value="4. GET /api/chat/beams-config&#xa;   Returns: { instance_id: &quot;xxx&quot; }&#xa;   (public — safe for client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="390" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s5" value="5. GET/POST /api/chat/beams-token&#xa;   @jwt_required() — must be logged in&#xa;   user_id = get_jwt_identity()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="465" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s6" value="6. generate_beams_token(user_id)&#xa;   → _pusher_client.generate_token(&quot;user_5&quot;)&#xa;   → SDK creates JWT signed with secret&#xa;   → Returns: { token: &quot;eyJhbG...&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="540" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s4" target="pb_s5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s5" target="pb_s6" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s_phase3" value="PHASE 3: SEND NOTIFICATION (when message sent)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#e74c3c;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="100" width="380" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s7" value="7. handle_private_message() fires&#xa;   receiver_sids is EMPTY (user offline)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="130" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s8" value="8. send_message_notification(&#xa;       receiver_id=5,&#xa;       sender_username=&quot;shikh&quot;,&#xa;       message_content=&quot;hi&quot;&#xa;   )" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="185" width="340" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_s9" value="9. _pusher_client.publish_to_users(&#xa;       user_ids=[&quot;user_5&quot;],&#xa;       publish_body={ web: { notification: {...} } }&#xa;   )&#xa;   → Pusher Beams server delivers to all&#xa;      devices of user_5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="280" width="340" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s7" target="pb_s8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_s8" target="pb_s9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_cloud_box" value="PUSHER BEAMS CLOUD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;strokeWidth=2;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="410" width="340" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_cloud_note" value="• Receives publish request&#xa;• Finds all devices registered to user_5&#xa;• Sends push notification to each device&#xa;• Uses FCM (Android) / APNs (iOS) / Web Push (browser)" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="470" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;dashed=1;strokeColor=#9673a6;" parent="1" source="pb_s9" target="pb_cloud_box" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_client" value="BROWSER (JavaScript)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="700" width="800" height="620" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c_phase1" value="PHASE 1: SERVICE WORKER REGISTRATION" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#2980b9;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="740" width="330" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c1" value="1. pusher.js loads (after globals.js)&#xa;   subscribeToPush() called" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="770" width="340" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c2" value="2. registerServiceWorker()&#xa;   navigator.serviceWorker.register(&quot;/sw.js&quot;)&#xa;   → sw.js loaded from /static/sw.js&#xa;   → Scope: http://localhost:5000/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="825" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow_c1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_c1" target="pb_c2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c_phase2" value="PHASE 2: GET CONFIG FROM SERVER" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#e67e22;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="920" width="300" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c3" value="3. getBeamsConfig()&#xa;   fetch(&quot;/api/chat/beams-config&quot;, {&#xa;     headers: { Authorization: Bearer jwt }&#xa;   })&#xa;   → Returns: { instance_id: &quot;20e31...&quot; }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="950" width="340" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow_c2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_c2" target="pb_c3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c_phase3" value="PHASE 3: INITIALIZE PUSHER BEAMS SDK" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#8e44ad;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1055" width="340" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c4" value="4. beamsClient = new PusherPushNotifications.Client({&#xa;       instanceId: config.instance_id,&#xa;       serviceWorkerRegistration: registration&#xa;   })" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1085" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c5" value="5. await beamsClient.start()&#xa;   → Registers device with Pusher Beams&#xa;   → Requests notification permission&#xa;   → Gets device ID (web-xxxx-xxxx)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1170" width="340" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow_c3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_c4" target="pb_c5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c_phase4" value="PHASE 4: AUTHENTICATE USER (setUserId)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#e74c3c;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="740" width="350" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c6" value="6. tokenProvider = new TokenProvider({&#xa;       url: &quot;/api/chat/beams-token&quot;,&#xa;       headers: { Authorization: Bearer jwt }&#xa;   })" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="770" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c7" value="7. await beamsClient.setUserId(&#xa;       &quot;user_5&quot;,&#xa;       tokenProvider&#xa;   )&#xa;   → SDK calls /api/chat/beams-token&#xa;   → Gets JWT token&#xa;   → Sends to Pusher Beams to link&#xa;      device to user_5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="845" width="340" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow_c4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_c6" target="pb_c7" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c_phase5" value="PHASE 5: RECEIVE NOTIFICATION" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontStyle=3;fontColor=#27ae60;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="990" width="300" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c8" value="8. sw.js receives push event&#xa;   PusherBeamsSDK handles it&#xa;   → Shows native browser notification&#xa;      Title: &quot;New message from shikh&quot;&#xa;      Body: &quot;hi&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="1020" width="340" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_c9" value="9. User clicks notification&#xa;   sw.js notificationclick handler&#xa;   → opens /chat or focuses existing tab" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="430" y="1115" width="340" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_arrow_c5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" parent="1" source="pb_c8" target="pb_c9" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="pb_summary" value="KEY CONCEPTS:&#xa;• instance_id = PUBLIC — tells SDK which Pusher project to use&#xa;• secret_key = PRIVATE — only on server, signs JWT tokens&#xa;• generate_token() — SDK creates JWT, server signs it&#xa;• setUserId() — links device to user, requires token from server&#xa;• publish_to_users() — sends to all devices of a user&#xa;• sw.js — handles showing notification + click behavior&#xa;• TokenProvider — SDK helper that auto-fetches token from your endpoint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=left;spacingLeft=10;spacingTop=5;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="1340" width="800" height="100" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
