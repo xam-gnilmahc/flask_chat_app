@@ -6,6 +6,7 @@ import time
 import logging
 import jwt
 import requests
+from eventlet import tpool
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +70,8 @@ def send_notification(user_id: str, title: str, body: str, data: dict = None):
 
     try:
         url = f"https://{_instance_id}.pushnotifications.pusher.com/publish_api/v1/instances/{_instance_id}/publishes/users"
-        response = requests.post(
+        response = tpool.execute(
+            requests.post,
             url,
             json=publish_request,
             headers={
