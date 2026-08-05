@@ -1,10 +1,16 @@
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_socketio import SocketIO
 from app.services.user_service import UserService
 
 jwt = JWTManager()
+cors = CORS()
 
-socketio = SocketIO(cors_allowed_origins=[], max_http_buffer_size=20 * 1024 * 1024)
+socketio = SocketIO(
+    cors_allowed_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
+    async_mode="threading",
+    max_http_buffer_size=20 * 1024 * 1024,
+)
 
 
 @jwt.token_in_blocklist_loader

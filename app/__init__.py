@@ -1,7 +1,7 @@
 from flask import Flask, render_template, send_from_directory
 
 from app.config import Config
-from app.extensions import jwt, socketio
+from app.extensions import jwt, socketio, cors
 from app.pusher_service import init_pusher
 
 
@@ -9,6 +9,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    cors.init_app(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:3000", "http://localhost:3000"]}})
     jwt.init_app(app)
     socketio.init_app(app)
 
