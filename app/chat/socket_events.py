@@ -344,14 +344,13 @@ class ChatSocketManager:
                 self.socketio.emit("new_message", payload, room=receiver_sid)
 
             # ─── PUSH NOTIFICATION ────────────────────────────────────
-            # Send push notification ONLY if:
-            #   1. Receiver has NO connected tabs (offline) → DON'T send
-            #      (user will see messages when they come back)
-            #   2. Receiver IS online but NOT viewing this chat → SEND
-            #      (user is on a different tab or different chat — like WhatsApp)
+            # Send push notification when:
+            #   1. Receiver is OFFLINE (no socket) — they'll get notified when they return
+            #   2. Receiver is ONLINE but NOT viewing this chat — like WhatsApp
+            # Don't send if they're actively viewing this conversation (socket handles it)
             with self._lock:
                 viewing_chat = self._user_viewing.get(int(to_user_id))
-            if receiver_sids and viewing_chat != sender_id:
+            if viewing_chat != sender_id:
                 threading.Thread(
                     target=send_message_notification,
                     args=(int(to_user_id), sender_info["username"], content),
