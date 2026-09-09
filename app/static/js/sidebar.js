@@ -47,6 +47,8 @@ async function loadUsers() {
   }
   const data = await res.json();
   document.getElementById("onlineCount").textContent = data.online_count;
+  document.getElementById("navUnreadBadge").textContent = data.online_count;
+  document.getElementById("navUnreadBadge").classList.add("show");
   window.__allUsers = data.users;
   renderUserList(data.users.filter(u => u.is_online).map(u => u.id));
 }
@@ -123,6 +125,58 @@ document.getElementById("changeProfilePicBtn").addEventListener("click", () => {
   document.getElementById("profileModalOverlay").classList.remove("hidden");
   document.getElementById("profileError").classList.add("hidden");
   document.getElementById("profileSaveBtn").disabled = true;
+});
+
+// Nav sidebar - section filtering
+const navItems = document.querySelectorAll(".nav-item[data-section]");
+navItems.forEach(item => {
+  item.addEventListener("click", () => {
+    navItems.forEach(n => n.classList.remove("active"));
+    item.classList.add("active");
+    const section = item.dataset.section;
+    filterUserListBySection(section);
+  });
+});
+
+function filterUserListBySection(section) {
+  const users = window.__allUsers || [];
+  const onlineIds = users.filter(u => u.is_online).map(u => u.id);
+  const list = document.getElementById("userList");
+  list.innerHTML = "";
+  let filtered;
+  switch (section) {
+    case "work":
+      filtered = users.filter(u => u.username.toLowerCase().includes("work"));
+      break;
+    case "friends":
+      filtered = users.filter(u => u.username.toLowerCase().includes("friend"));
+      break;
+    case "news":
+      filtered = [];
+      break;
+    case "archive":
+      filtered = users.filter(u => !u.is_online);
+      break;
+    default:
+      filtered = users;
+  }
+  renderUserList(onlineIds);
+}
+
+// Nav profile button
+document.getElementById("navProfileBtn").addEventListener("click", () => {
+  document.getElementById("profileModalOverlay").classList.remove("hidden");
+  document.getElementById("profileError").classList.add("hidden");
+  document.getElementById("profileSaveBtn").disabled = true;
+});
+
+// Nav logout button
+document.getElementById("navLogoutBtn").addEventListener("click", () => {
+  socket.disconnect();
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("e2ee_private_key");
+  window.location.href = "/";
 });
 
 // Toggle sidebar collapsed/expanded
